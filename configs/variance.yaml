@@ -2,17 +2,22 @@ base_config:
   - configs/base.yaml
 
 task_cls: training.variance_task.VarianceTask
-num_spk: 1
-speakers:
-  - opencpop
-spk_ids: []
-test_prefixes: [
-    '2044',
-    '2086',
-    '2092',
-    '2093',
-    '2100',
-]
+
+dictionaries:
+  zh: dictionaries/opencpop-extension.txt
+extra_phonemes: []
+merged_phoneme_groups: []
+datasets:
+  - raw_data_dir: 'data/opencpop/raw'
+    speaker: opencpop
+    spk_id: 0
+    language: zh
+    test_prefixes:
+      - '2044'
+      - '2086'
+      - '2092'
+      - '2093'
+      - '2100'
 
 audio_sample_rate: 44100
 hop_size: 512            # Hop size.
@@ -25,22 +30,22 @@ binarization_args:
   num_workers: 0
   prefer_ds: false
 
-raw_data_dir: 'data/opencpop_variance/raw'
 binary_data_dir: 'data/opencpop_variance/binary'
 binarizer_cls: preprocessing.variance_binarizer.VarianceBinarizer
-dictionary: dictionaries/opencpop-extension.txt
 
+use_lang_id: false
+num_lang: 1
 use_spk_id: false
-
-rel_pos: true
-hidden_size: 256
-
+num_spk: 1
 predict_dur: true
 predict_pitch: true
 predict_energy: false
 predict_breathiness: false
 predict_voicing: false
 predict_tension: false
+
+rel_pos: true
+hidden_size: 256
 
 dur_prediction_args:
   arch: fs2
