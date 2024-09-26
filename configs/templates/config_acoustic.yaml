@@ -102,6 +102,7 @@ lr_scheduler_args:
 max_batch_frames: 50000
 max_batch_size: 64
 max_updates: 160000
+max_epochs: 1000
 
 num_valid_plots: 10
 val_with_vocoder: true

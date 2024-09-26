@@ -414,7 +414,7 @@ class BaseTask(pl.LightningModule):
                     auto_insert_metric_name=False,
                     monitor='step',
                     mode='max',
-                    save_last=False,
+                    save_last=True,
                     # every_n_train_steps=hparams['val_check_interval'],
                     save_top_k=hparams['num_ckpt_keep'],
                     permanent_ckpt_start=hparams['permanent_ckpt_start'],
@@ -435,6 +435,7 @@ class BaseTask(pl.LightningModule):
             check_val_every_n_epoch=None,
             log_every_n_steps=1,
             max_steps=hparams['max_updates'],
+            max_epochs=hparams['max_epochs'],
             use_distributed_sampler=False,
             num_sanity_val_steps=hparams['num_sanity_val_steps'],
             accumulate_grad_batches=hparams['accumulate_grad_batches']
