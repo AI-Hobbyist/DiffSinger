@@ -414,7 +414,7 @@ class BaseTask(pl.LightningModule):
                     auto_insert_metric_name=False,
                     monitor='step',
                     mode='max',
-                    save_last=True,
+                    save_last=False,
                     # every_n_train_steps=hparams['val_check_interval'],
                     save_top_k=hparams['num_ckpt_keep'],
                     permanent_ckpt_start=hparams['permanent_ckpt_start'],
