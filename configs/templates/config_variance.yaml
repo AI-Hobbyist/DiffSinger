@@ -119,6 +119,7 @@ max_epochs: 1000
 
 num_valid_plots: 10
 val_check_interval: 2000
+check_val_every_n_epoch: 1
 num_ckpt_keep: 5
 permanent_ckpt_start: 80000
 permanent_ckpt_interval: 10000

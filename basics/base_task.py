@@ -395,6 +395,17 @@ class BaseTask(pl.LightningModule):
         #     print("load success-------------------------------------------------------------------")
 
         work_dir = pathlib.Path(hparams['work_dir'])
+        
+        if hparams['val_check_interval'] is None and hparams['check_val_every_n_epoch'] is not None:
+            val_check_interval = None
+            check_val_every_n_epoch = hparams['check_val_every_n_epoch']
+        elif hparams['check_val_every_n_epoch'] is None and hparams['val_check_interval'] is not None:
+            val_check_interval = hparams['val_check_interval'] * hparams['accumulate_grad_batches']
+            check_val_every_n_epoch = None
+        else:
+            val_check_interval = hparams['val_check_interval'] * hparams['accumulate_grad_batches']
+            check_val_every_n_epoch = None
+        
         trainer = pl.Trainer(
             accelerator=hparams['pl_trainer_accelerator'],
             devices=hparams['pl_trainer_devices'],
@@ -430,9 +441,9 @@ class BaseTask(pl.LightningModule):
                 version='latest'
             ),
             gradient_clip_val=hparams['clip_grad_norm'],
-            val_check_interval=hparams['val_check_interval'] * hparams['accumulate_grad_batches'],
+            val_check_interval=val_check_interval,
             # so this is global_steps
-            check_val_every_n_epoch=None,
+            check_val_every_n_epoch=check_val_every_n_epoch,
             log_every_n_steps=1,
             max_steps=hparams['max_updates'],
             max_epochs=hparams['max_epochs'],
