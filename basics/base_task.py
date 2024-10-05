@@ -396,10 +396,10 @@ class BaseTask(pl.LightningModule):
 
         work_dir = pathlib.Path(hparams['work_dir'])
         
-        if hparams['val_check_interval'] is None and hparams['check_val_every_n_epoch'] is not None:
+        if hparams['val_check_interval'] == 0 and hparams['check_val_every_n_epoch'] != 0:
             val_check_interval = None
             check_val_every_n_epoch = hparams['check_val_every_n_epoch']
-        elif hparams['check_val_every_n_epoch'] is None and hparams['val_check_interval'] is not None:
+        elif hparams['check_val_every_n_epoch'] == 0 and hparams['val_check_interval'] != 0:
             val_check_interval = hparams['val_check_interval'] * hparams['accumulate_grad_batches']
             check_val_every_n_epoch = None
         else:
