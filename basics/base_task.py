@@ -20,7 +20,7 @@ from basics.base_module import CategorizedModule
 from utils.hparams import hparams
 from utils.training_utils import (
     DsModelCheckpoint, DsTQDMProgressBar,
-    DsBatchSampler, DsTensorBoardLogger,
+    DsBatchSampler, DsWandbLogger,
     get_latest_checkpoint_path, get_strategy
 )
 from utils.phoneme_utils import load_phoneme_dictionary
@@ -435,10 +435,10 @@ class BaseTask(pl.LightningModule):
                 # LearningRateMonitor(logging_interval='step'),
                 DsTQDMProgressBar(),
             ],
-            logger=DsTensorBoardLogger(
-                save_dir=str(work_dir),
-                name='lightning_logs',
-                version='latest'
+            logger=DsWandbLogger(
+                project = 'DiffSinger',
+                save_dir = str(work_dir),
+                name = "lightning_logs"
             ),
             gradient_clip_val=hparams['clip_grad_norm'],
             val_check_interval=val_check_interval,

@@ -20,3 +20,4 @@ tensorboard
 tensorboardX
 torchmetrics
 tqdm
+wandb
