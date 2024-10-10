@@ -8,7 +8,7 @@ import lightning.pytorch as pl
 import numpy as np
 import torch
 from lightning.pytorch.callbacks import ModelCheckpoint, TQDMProgressBar
-from pytorch_lightning.loggers import WandbLogger, rank_zero_only
+from pytorch_lightning.loggers import WandbLogger
 from lightning.pytorch.utilities.rank_zero import rank_zero_info, rank_zero_only
 from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data.distributed import Sampler
