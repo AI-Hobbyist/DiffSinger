@@ -398,10 +398,10 @@ class BaseTask(pl.LightningModule):
         
         if "ep" in hparams['val_check_interval']:
             val_check_interval = hparams['val_check_interval'].replace('ep', '')
-            val_check_interval_ep = val_check_interval * hparams['accumulate_grad_batches'],
+            val_check_interval_ep = val_check_interval * hparams['accumulate_grad_batches']
             val_check_interval_steps = None
         else:
-            val_check_interval_steps = hparams['val_check_interval']
+            val_check_interval_steps = hparams['val_check_interval'] * hparams['accumulate_grad_batches']
             val_check_interval_ep = None
             
         if "ep" in hparams['max_updates']:
