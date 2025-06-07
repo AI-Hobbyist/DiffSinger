@@ -278,8 +278,8 @@ class BaseBinarizer:
                 self.phoneme_dictionary.decode_one(idx, scalar=False)
                 for idx in ph_idx_required.difference(ph_idx_occurred)
             }, key=lambda v: v[0] if isinstance(v, tuple) else v)
-            raise BinarizationError(
-                f'The following phonemes are not covered in transcriptions: {missing_phones}'
+            print(
+                f'The following phonemes are not recognized or missing in the dataset: {sorted(missing_phones)}. For fine-tuning, please ignore this warning.'
             )
 
     def process_dataset(self, prefix, num_workers=0, apply_augmentation=False):

@@ -395,6 +395,10 @@ class BaseTask(pl.LightningModule):
         #     print("load success-------------------------------------------------------------------")
 
         work_dir = pathlib.Path(hparams['work_dir'])
+        
+        if "ep" in hparams['val_check_interval']:
+            val_check_interval = hparams['val_check_interval'].
+            
         trainer = pl.Trainer(
             accelerator=hparams['pl_trainer_accelerator'],
             devices=hparams['pl_trainer_devices'],
