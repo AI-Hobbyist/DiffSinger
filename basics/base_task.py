@@ -397,7 +397,20 @@ class BaseTask(pl.LightningModule):
         work_dir = pathlib.Path(hparams['work_dir'])
         
         if "ep" in hparams['val_check_interval']:
-            val_check_interval = hparams['val_check_interval'].
+            val_check_interval = hparams['val_check_interval'].replace('ep', '')
+            val_check_interval_ep = val_check_interval * hparams['accumulate_grad_batches'],
+            val_check_interval_steps = None
+        else:
+            val_check_interval_steps = hparams['val_check_interval']
+            val_check_interval_ep = None
+            
+        if "ep" in hparams['max_updates']:
+            max_updates_ep = hparams['max_updates'].replace('ep', '')
+            max_updates_steps = None
+        else:
+            max_updates_steps = hparams['max_updates']
+            max_updates_ep = None
+            
             
         trainer = pl.Trainer(
             accelerator=hparams['pl_trainer_accelerator'],
@@ -434,11 +447,12 @@ class BaseTask(pl.LightningModule):
                 version='latest'
             ),
             gradient_clip_val=hparams['clip_grad_norm'],
-            val_check_interval=hparams['val_check_interval'] * hparams['accumulate_grad_batches'],
+            val_check_interval= val_check_interval_steps,
             # so this is global_steps
-            check_val_every_n_epoch=None,
+            check_val_every_n_epoch= val_check_interval_ep,
             log_every_n_steps=1,
-            max_steps=hparams['max_updates'],
+            max_steps=max_updates_steps,
+            max_epochs=max_updates_ep,
             use_distributed_sampler=False,
             num_sanity_val_steps=hparams['num_sanity_val_steps'],
             accumulate_grad_batches=hparams['accumulate_grad_batches']
