@@ -223,6 +223,8 @@ class BaseTask(pl.LightningModule):
             tb_log = {f'training/{k}': v for k, v in log_outputs.items()}
             tb_log['training/lr'] = self.lr_schedulers().get_last_lr()[0]
             self.logger.log_metrics(tb_log, step=self.global_step)
+            
+            self.logger.log_metrics({'training_epochs/epoch': self.current_epoch}, step=self.global_step)
 
         return total_loss
 
