@@ -203,6 +203,8 @@ class BaseTask(pl.LightningModule):
     def on_train_epoch_start(self):
         if self.training_sampler is not None:
             self.training_sampler.set_epoch(self.current_epoch)
+        
+        self.logger.log_metrics({'epoch/current_epoch': self.current_epoch}, step=self.global_step)
 
     def _training_step(self, sample):
         """
@@ -223,8 +225,6 @@ class BaseTask(pl.LightningModule):
             tb_log = {f'training/{k}': v for k, v in log_outputs.items()}
             tb_log['training/lr'] = self.lr_schedulers().get_last_lr()[0]
             self.logger.log_metrics(tb_log, step=self.global_step)
-            
-            self.logger.log_metrics({'epoch/current_epoch': self.current_epoch}, step=float(self.global_step))
 
         return total_loss
 
