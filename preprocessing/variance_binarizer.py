@@ -128,59 +128,62 @@ class VarianceBinarizer(BaseBinarizer):
                     if value is None and not optional:
                         raise ValueError(f'Missing required attribute {attr} of item \'{item_name}\'.')
                     return value
+                try:
+                    temp_dict = {
+                        'ds_idx': item_idx,
+                        'spk_id': self.spk_map[spk],
+                        'spk_name': spk,
+                        'language_id': self.lang_map[lang],
+                        'language_name': lang,
+                        'wav_fn': str(raw_data_dir / 'wavs' / f'{item_name}.wav'),
+                        'lang_seq': [
+                            (
+                                self.lang_map[lang if '/' not in p else p.split('/', maxsplit=1)[0]]
+                                if self.phoneme_dictionary.is_cross_lingual(p)
+                                else 0
+                            )
+                            for p in utterance_label['ph_seq'].split()
+                        ],
+                        'ph_seq': self.phoneme_dictionary.encode(require('ph_seq'), lang=lang),
+                        'ph_dur': [float(x) for x in require('ph_dur').split()],
+                        'ph_text': require('ph_seq'),
+                    }
 
-                temp_dict = {
-                    'ds_idx': item_idx,
-                    'spk_id': self.spk_map[spk],
-                    'spk_name': spk,
-                    'language_id': self.lang_map[lang],
-                    'language_name': lang,
-                    'wav_fn': str(raw_data_dir / 'wavs' / f'{item_name}.wav'),
-                    'lang_seq': [
-                        (
-                            self.lang_map[lang if '/' not in p else p.split('/', maxsplit=1)[0]]
-                            if self.phoneme_dictionary.is_cross_lingual(p)
-                            else 0
-                        )
-                        for p in utterance_label['ph_seq'].split()
-                    ],
-                    'ph_seq': self.phoneme_dictionary.encode(require('ph_seq'), lang=lang),
-                    'ph_dur': [float(x) for x in require('ph_dur').split()],
-                    'ph_text': require('ph_seq'),
-                }
+                    assert len(temp_dict['ph_seq']) == len(temp_dict['ph_dur']), \
+                        f'Lengths of ph_seq and ph_dur mismatch in \'{item_name}\'.'
+                    assert all(ph_dur >= 0 for ph_dur in temp_dict['ph_dur']), \
+                        f'Negative ph_dur found in \'{item_name}\'.'
 
-                assert len(temp_dict['ph_seq']) == len(temp_dict['ph_dur']), \
-                    f'Lengths of ph_seq and ph_dur mismatch in \'{item_name}\'.'
-                assert all(ph_dur >= 0 for ph_dur in temp_dict['ph_dur']), \
-                    f'Negative ph_dur found in \'{item_name}\'.'
+                    if hparams['predict_dur']:
+                        temp_dict['ph_num'] = [int(x) for x in require('ph_num').split()]
+                        assert len(temp_dict['ph_seq']) == sum(temp_dict['ph_num']), \
+                            f'Sum of ph_num does not equal length of ph_seq in \'{item_name}\'.'
 
-                if hparams['predict_dur']:
-                    temp_dict['ph_num'] = [int(x) for x in require('ph_num').split()]
-                    assert len(temp_dict['ph_seq']) == sum(temp_dict['ph_num']), \
-                        f'Sum of ph_num does not equal length of ph_seq in \'{item_name}\'.'
+                    if hparams['predict_pitch']:
+                        temp_dict['note_seq'] = require('note_seq').split()
+                        temp_dict['note_dur'] = [float(x) for x in require('note_dur').split()]
+                        assert all(note_dur >= 0 for note_dur in temp_dict['note_dur']), \
+                            f'Negative note_dur found in \'{item_name}\'.'
+                        assert len(temp_dict['note_seq']) == len(temp_dict['note_dur']), \
+                            f'Lengths of note_seq and note_dur mismatch in \'{item_name}\'.'
+                        assert any([note != 'rest' for note in temp_dict['note_seq']]), \
+                            f'All notes are rest in \'{item_name}\'.'
+                        if hparams['use_glide_embed']:
+                            note_glide = require('note_glide', optional=True)
+                            if note_glide is None:
+                                note_glide = ['none' for _ in temp_dict['note_seq']]
+                            else:
+                                note_glide = note_glide.split()
+                                assert len(note_glide) == len(temp_dict['note_seq']), \
+                                    f'Lengths of note_seq and note_glide mismatch in \'{item_name}\'.'
+                                assert all(g in self.glide_map for g in note_glide), \
+                                    f'Invalid glide type found in \'{item_name}\'.'
+                            temp_dict['note_glide'] = note_glide
 
-                if hparams['predict_pitch']:
-                    temp_dict['note_seq'] = require('note_seq').split()
-                    temp_dict['note_dur'] = [float(x) for x in require('note_dur').split()]
-                    assert all(note_dur >= 0 for note_dur in temp_dict['note_dur']), \
-                        f'Negative note_dur found in \'{item_name}\'.'
-                    assert len(temp_dict['note_seq']) == len(temp_dict['note_dur']), \
-                        f'Lengths of note_seq and note_dur mismatch in \'{item_name}\'.'
-                    assert any([note != 'rest' for note in temp_dict['note_seq']]), \
-                        f'All notes are rest in \'{item_name}\'.'
-                    if hparams['use_glide_embed']:
-                        note_glide = require('note_glide', optional=True)
-                        if note_glide is None:
-                            note_glide = ['none' for _ in temp_dict['note_seq']]
-                        else:
-                            note_glide = note_glide.split()
-                            assert len(note_glide) == len(temp_dict['note_seq']), \
-                                f'Lengths of note_seq and note_glide mismatch in \'{item_name}\'.'
-                            assert all(g in self.glide_map for g in note_glide), \
-                                f'Invalid glide type found in \'{item_name}\'.'
-                        temp_dict['note_glide'] = note_glide
-
-                meta_data_dict[f'{ds_id}:{item_name}'] = temp_dict
+                    meta_data_dict[f'{ds_id}:{item_name}'] = temp_dict
+                except Exception as e:
+                    print(f'Error processing item {item_name}: {e} Skipping this item.')
+                    continue
 
         return meta_data_dict
 
