@@ -23,6 +23,7 @@ def get_mel_torch(
     with torch.no_grad():
         wav_torch = torch.from_numpy(waveform).to(device)
         mel_torch = stft.get_mel(wav_torch.unsqueeze(0), keyshift=keyshift, speed=speed).squeeze(0).T
+        torch.cuda.empty_cache()
         return mel_torch.cpu().numpy()
 
 
@@ -36,6 +37,7 @@ def get_mel2ph_torch(lr, durs, length, timestep, device='cpu'):
         mel2ph = torch.cat((mel2ph, torch.full((length - num_frames,), fill_value=mel2ph[-1], device=device)), dim=0)
     elif num_frames > length:
         mel2ph = mel2ph[:length]
+    torch.cuda.empty_cache()
     return mel2ph
 
 
