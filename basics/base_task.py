@@ -406,7 +406,7 @@ class BaseTask(pl.LightningModule):
             
         if "ep" in str(hparams['max_updates']):
             max_updates_ep = int(hparams['max_updates'].replace('ep', ''))
-            max_updates_steps = None
+            max_updates_steps = 2147483647
         else:
             max_updates_steps = hparams['max_updates']
             max_updates_ep = None
