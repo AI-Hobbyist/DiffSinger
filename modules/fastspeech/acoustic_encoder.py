@@ -6,6 +6,7 @@ from modules.commons.common_layers import (
     NormalInitEmbedding as Embedding,
     XavierUniformInitLinear as Linear,
 )
+from modules.fastspeech.bbc_mask import fast_bbc_mask, fast_fast_bbc_mask
 from modules.fastspeech.tts_modules import FastSpeech2Encoder, mel2ph_to_dur
 from utils.hparams import hparams
 from utils.phoneme_utils import PAD_INDEX
@@ -49,6 +50,26 @@ class FastSpeech2Acoustic(nn.Module):
                 for v_name in self.variance_embed_list
             })
 
+        self.use_variance_scaling = hparams.get('use_variance_scaling', False)
+        if self.use_variance_scaling:
+            self.variance_scaling_factor = {
+                'energy': 1. / 96,
+                'breathiness': 1. / 96,
+                'voicing': 1. / 96,
+                'tension': 0.1,
+                'key_shift': 1. / 12,
+                'speed': 1.
+            }
+        else:
+            self.variance_scaling_factor = {
+                'energy': 1.,
+                'breathiness': 1.,
+                'voicing': 1.,
+                'tension': 1.,
+                'key_shift': 1.,
+                'speed': 1.
+            }
+
         self.use_key_shift_embed = hparams.get('use_key_shift_embed', False)
         if self.use_key_shift_embed:
             self.key_shift_embed = Linear(1, hparams['hidden_size'])
@@ -61,20 +82,30 @@ class FastSpeech2Acoustic(nn.Module):
         if self.use_spk_id:
             self.spk_embed = Embedding(hparams['num_spk'], hparams['hidden_size'])
 
+        self.use_bbc_encoder = hparams.get('use_bbc_encoder', False)
+        if self.use_bbc_encoder:
+            self.bbc_mask_len = hparams['bbc_mask_len']
+            self.bbc_min_segment_length=hparams['bbc_min_segment_length']
+            self.bbc_mask_prob=hparams['bbc_mask_prob']
+            self.bbc_mask_emb=nn.Parameter(torch.randn(1, 1, hparams['hidden_size']))
+
     def forward_variance_embedding(self, condition, key_shift=None, speed=None, **variances):
         if self.use_variance_embeds:
             variance_embeds = torch.stack([
-                self.variance_embeds[v_name](variances[v_name][:, :, None])
+                self.variance_embeds[v_name](variances[v_name][:, :, None]) 
+                * self.variance_scaling_factor[v_name]
                 for v_name in self.variance_embed_list
             ], dim=-1).sum(-1)
             condition += variance_embeds
 
         if self.use_key_shift_embed:
             key_shift_embed = self.key_shift_embed(key_shift[:, :, None])
+            key_shift_embed *= self.variance_scaling_factor['key_shift']
             condition += key_shift_embed
 
         if self.use_speed_embed:
             speed_embed = self.speed_embed(speed[:, :, None])
+            speed_embed *= self.variance_scaling_factor['speed']
             condition += speed_embed
 
         return condition
@@ -87,17 +118,27 @@ class FastSpeech2Acoustic(nn.Module):
     ):
         txt_embed = self.txt_embed(txt_tokens)
         dur = mel2ph_to_dur(mel2ph, txt_tokens.shape[1]).float()
-        dur_embed = self.dur_embed(dur[:, :, None])
+        if self.use_variance_scaling:
+            dur_embed = self.dur_embed(torch.log(1 + dur[:, :, None]))
+        else:
+            dur_embed = self.dur_embed(dur[:, :, None])
         if self.use_lang_id:
             lang_embed = self.lang_embed(languages)
             extra_embed = dur_embed + lang_embed
         else:
             extra_embed = dur_embed
         encoder_out = self.encoder(txt_embed, extra_embed, txt_tokens == 0)
+        if self.use_bbc_encoder:
 
-        encoder_out = F.pad(encoder_out, [0, 0, 1, 0])
-        mel2ph_ = mel2ph[..., None].repeat([1, 1, encoder_out.shape[-1]])
-        condition = torch.gather(encoder_out, 1, mel2ph_)
+            encoder_out=torch.cat([self.bbc_mask_emb.expand(mel2ph.shape[0],1,encoder_out.shape[-1]),encoder_out],dim=1)
+            encoder_out = F.pad(encoder_out, [0, 0, 1, 0])
+            mel2ph=fast_fast_bbc_mask(mel2ph,mask_length=self.bbc_mask_len,min_segment_length=self.bbc_min_segment_length,mask_prob=self.bbc_mask_prob)
+            mel2ph_ = mel2ph[..., None].repeat([1, 1, encoder_out.shape[-1]])
+            condition = torch.gather(encoder_out, 1, mel2ph_)
+        else:
+            encoder_out = F.pad(encoder_out, [0, 0, 1, 0])
+            mel2ph_ = mel2ph[..., None].repeat([1, 1, encoder_out.shape[-1]])
+            condition = torch.gather(encoder_out, 1, mel2ph_)
 
         if self.use_spk_id:
             spk_mix_embed = kwargs.get('spk_mix_embed')

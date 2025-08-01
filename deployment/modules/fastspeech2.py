@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from modules.commons.common_layers import NormalInitEmbedding as Embedding
+from modules.fastspeech.bbc_mask import fast_bbc_mask
 from modules.fastspeech.acoustic_encoder import FastSpeech2Acoustic
 from modules.fastspeech.variance_encoder import FastSpeech2Variance
 from utils.hparams import hparams
@@ -74,8 +75,11 @@ class FastSpeech2AcousticONNX(FastSpeech2Acoustic):
         durations = durations * (tokens > 0)
         mel2ph = self.lr(durations)
         f0 = f0 * (mel2ph > 0)
-        mel2ph = mel2ph[..., None].repeat((1, 1, hparams['hidden_size']))
-        dur_embed = self.dur_embed(durations.float()[:, :, None])
+
+        if self.use_variance_scaling:
+            dur_embed = self.dur_embed(torch.log(1 + durations.float())[:, :, None])
+        else:
+            dur_embed = self.dur_embed(durations.float()[:, :, None])
         if self.use_lang_id:
             lang_mask = torch.any(
                 tokens[..., None] == self.cross_lingual_token_idx[None, None],
@@ -86,8 +90,17 @@ class FastSpeech2AcousticONNX(FastSpeech2Acoustic):
         else:
             extra_embed = dur_embed
         encoded = self.encoder(txt_embed, extra_embed, tokens == PAD_INDEX)
-        encoded = F.pad(encoded, (0, 0, 1, 0))
-        condition = torch.gather(encoded, 1, mel2ph)
+
+        if self.use_bbc_encoder:
+            encoded=torch.cat([self.bbc_mask_emb.expand(mel2ph.shape[0],1,encoded.shape[-1]),encoded],dim=1)
+            encoded = F.pad(encoded, (0, 0, 1, 0))
+            mel2ph=fast_bbc_mask(mel2ph,mask_length=self.bbc_mask_len,min_segment_length=self.bbc_min_segment_length,mask_prob=self.bbc_mask_prob)
+            mel2ph = mel2ph[..., None].repeat((1, 1, hparams['hidden_size']))
+            condition = torch.gather(encoded, 1, mel2ph)
+        else:
+            encoded = F.pad(encoded, (0, 0, 1, 0))
+            mel2ph = mel2ph[..., None].repeat((1, 1, hparams['hidden_size']))
+            condition = torch.gather(encoded, 1, mel2ph)
 
         if self.f0_embed_type == 'discrete':
             pitch = f0_to_coarse(f0)
@@ -100,6 +113,7 @@ class FastSpeech2AcousticONNX(FastSpeech2Acoustic):
         if self.use_variance_embeds:
             variance_embeds = torch.stack([
                 self.variance_embeds[v_name](variances[v_name][:, :, None])
+                * self.variance_scaling_factor[v_name]
                 for v_name in self.variance_embed_list
             ], dim=-1).sum(-1)
             condition += variance_embeds
@@ -112,6 +126,7 @@ class FastSpeech2AcousticONNX(FastSpeech2Acoustic):
                 gender_mask = (gender < 0.).float()
                 key_shift = gender * ((1. - gender_mask) * self.shift_max + gender_mask * abs(self.shift_min))
                 key_shift_embed = self.key_shift_embed(key_shift[:, :, None])
+            key_shift_embed *= self.variance_scaling_factor['key_shift']
             condition += key_shift_embed
 
         if hparams['use_speed_embed']:
@@ -120,6 +135,7 @@ class FastSpeech2AcousticONNX(FastSpeech2Acoustic):
                 speed_embed = self.speed_embed(velocity[:, :, None])
             else:
                 speed_embed = self.speed_embed(torch.FloatTensor([1.]).to(condition.device)[:, None, None])
+            speed_embed *= self.variance_scaling_factor['speed']
             condition += speed_embed
 
         if hparams['use_spk_id']:
@@ -162,7 +178,10 @@ class FastSpeech2VarianceONNX(FastSpeech2Variance):
 
     def forward_encoder_phoneme(self, tokens, ph_dur, languages=None):
         txt_embed = self.txt_embed(tokens)
-        ph_dur_embed = self.ph_dur_embed(ph_dur.float()[:, :, None])
+        if self.use_variance_scaling:
+            ph_dur_embed = self.ph_dur_embed(torch.log(1 + ph_dur.float())[:, :, None])
+        else:
+            ph_dur_embed = self.ph_dur_embed(ph_dur.float()[:, :, None])
         if self.use_lang_id:
             lang_mask = torch.any(
                 tokens[..., None] == self.cross_lingual_token_idx[None, None],
