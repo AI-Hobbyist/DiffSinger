@@ -98,6 +98,8 @@ def optimize(checkpoint, config, output_dir, precision='int8', component='auto')
                 'torch_version': str(torch.__version__)}
     saved_config = copy.deepcopy(hparams)
     saved_config.update(base_config=[], work_dir=str(output_dir), infer=True)
+    if original.get('lora') or hparams.get('lora', {}).get('enabled', False):
+        saved_config['lora'] = {'enabled': False}
     saved_config['all_in_one'] = {**saved_config.get('all_in_one', {}), 'enabled': category == 'all_in_one'}
     # Resolve source dictionary files before copying so output configs are portable.
     dictionaries = {}

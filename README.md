@@ -27,6 +27,7 @@ This is a refactored and enhanced version of _DiffSinger: Singing Voice Synthesi
 - **DiT & all-in-one training**: See [DiT and All-in-one](docs/DiTAndAllInOne.md) and [Model Scaling](docs/ModelScaling.md)
 - **Native checkpoint pruning & INT8/FP16/FP32 inference**: See [Checkpoint Optimization](docs/CheckpointOptimization.md)
 - **Optimized ONNX & LibTorch exports**: See [Deployment Exports](docs/DeploymentExports.md)
+- **LoRA fine-tuning & merged exports**: See [LoRA](docs/LoRA.md)
 - **Editing configurations**: See [Configuration Schemas](docs/ConfigurationSchemas.md)
 - **Deployment & production**: [OpenUTAU](https://github.com/stakira/OpenUtau), [DiffScope (under development)](https://github.com/diffscope/diffscope-project)
 - **Communication groups**: [QQ Group](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=fibG_dxuPW5maUJwe9_ya5-zFcIwaoOR&authKey=ZgLCG5EqQVUGCID1nfKei8tCnlQHAmD9koxebFXv5WfUchhLwWxb52o1pimNai5A&noverify=0&group_code=907879266) (907879266), [Discord server](https://discord.gg/wwbu2JUMjj)

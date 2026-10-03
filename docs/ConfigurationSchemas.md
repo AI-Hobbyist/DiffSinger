@@ -1079,6 +1079,17 @@ Controls how often training metrics are logged to TensorBoard, measured in globa
 <tr><td align="center"><b>default</b></td><td>100</td>
 </tbody></table>
 
+### lora
+
+Optional LoRA fine-tuning configuration. Defaults: `enabled: false`, `base_ckpt: null`, `rank: 8`, `alpha: 16`, `target_modules: [linear]`, `train_bias: false`. A new LoRA experiment requires compatible base weights. Only adapters and optionally biases are trained; full checkpoints retain the base and resume optimizer state. Inference and export merge adapters into ordinary weights using saved metadata. See [LoRA fine-tuning and export](LoRA.md) for examples, module targeting, resume requirements, and deployment commands.
+
+<table><tbody>
+<tr><td align="center"><b>visibility</b></td><td>acoustic, variance, all-in-one</td>
+<tr><td align="center"><b>scope</b></td><td>training, inference, deployment</td>
+<tr><td align="center"><b>type</b></td><td>dict[str, Any]</td>
+<tr><td align="center"><b>constraints</b></td><td>Positive integer rank and positive finite alpha. Nonempty regex target list must match Linear modules. Base loading is strict; disable finetune_enabled and freezing_enabled when LoRA is enabled.</td>
+</tbody></table>
+
 ### lr_scheduler_args
 
 Arguments of learning rate scheduler. Keys will be used as keyword arguments of the `__init__()` method of [lr_scheduler_args.scheduler_cls](#lr_scheduler_argsscheduler_cls).

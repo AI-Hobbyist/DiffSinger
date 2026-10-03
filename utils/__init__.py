@@ -232,6 +232,17 @@ def load_ckpt(
         renamed[k] = v
     state_dict = renamed
 
+    if ckpt_loaded.get('lora') or any(k.endswith(('.lora_A', '.lora_B')) for k in state_dict):
+        from utils.lora import LoRALinear, merge_lora_state_dict
+        if not any(isinstance(m, LoRALinear) for m in cur_model.modules()):
+            from utils.hparams import hparams
+            legacy_lora = hparams.get('lora', {})
+            if not legacy_lora.get('enabled', False):
+                legacy_lora = None
+            state_dict = merge_lora_state_dict(state_dict, ckpt_loaded.get('lora'),
+                                               legacy_lora, prefix=prefix_in_ckpt or '')
+            cur_model._lora_merged = True
+
     optimized = ckpt_loaded.get('inference_optimization')
     if optimized is not None:
         if not strict:

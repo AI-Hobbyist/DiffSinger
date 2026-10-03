@@ -37,9 +37,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--backbones', nargs='+', default=['wavenet', 'lynxnet', 'lynxnet2', 'dit'])
     parser.add_argument('--objectives', nargs='+', default=['ddpm', 'reflow'])
-    parser.add_argument('--precisions', nargs='+', default=['int8'])
+    parser.add_argument('--precisions', nargs='+')
+    parser.add_argument('--lora', action='store_true', help='Validate export from a full LoRA checkpoint after merging.')
     parser.add_argument('--output', type=Path)
     args = parser.parse_args()
+    args.precisions = args.precisions or (['fp32'] if args.lora else ['int8'])
+    if args.lora and args.precisions != ['fp32']:
+        parser.error('--lora validates original FP32 LoRA checkpoints; use fp32 precision.')
     cases = list(itertools.product(args.backbones, args.objectives, args.precisions))
     if len(cases) > 1:
         # Match the command-line deployment workflow: a fresh exporter process
@@ -48,7 +52,7 @@ def main():
         with tempfile.TemporaryDirectory(prefix='diffsinger-export-results-') as directory:
             for index, (kind, objective, precision) in enumerate(cases):
                 result = Path(directory) / f'{index}.json'
-                subprocess.run([sys.executable, str(Path(__file__)), '--backbones', kind,
+                subprocess.run([sys.executable, str(Path(__file__)), *(['--lora'] if args.lora else []), '--backbones', kind,
                                 '--objectives', objective, '--precisions', precision,
                                 '--output', str(result)], check=True)
                 records.extend(json.loads(result.read_text(encoding='utf-8')))
@@ -73,14 +77,27 @@ def main():
                     saved['base_config'] = []
                     (case / 'config.yaml').write_text(yaml.safe_dump(saved), encoding='utf-8')
                     model = DiffSingerAllInOne(len(load_phoneme_dictionary()), 4).eval()
-                    prepare_inference_model(model, precision)
+                    if not args.lora:
+                        prepare_inference_model(model, precision)
+                    if args.lora:
+                        from utils.lora import inject_lora
+                        inject_lora(model, rank=2, alpha=4)
+                        with torch.no_grad():
+                            for name, parameter in model.named_parameters():
+                                if name.endswith('.lora_B'):
+                                    parameter.normal_(std=0.02)
                     if precision == 'int8':
                         assert not any(p.is_floating_point() for p in model.parameters())
                     checkpoint = case / 'model_ckpt_steps_1.ckpt'
-                    torch.save({'category': 'all_in_one',
+                    artifact = {'category': 'all_in_one',
                                 'inference_optimization': {'format_version': 1, 'precision': precision,
                                                           'quantize_small_parameters': precision == 'int8'},
-                                'state_dict': {'model.' + k: v for k, v in model.state_dict().items()}}, checkpoint)
+                                'state_dict': {'model.' + k: v for k, v in model.state_dict().items()}}
+                    if args.lora:
+                        from utils.lora import lora_metadata
+                        artifact.pop('inference_optimization')
+                        artifact['lora'] = lora_metadata(model)
+                    torch.save(artifact, checkpoint)
                     del model
                     for component, factory in [('acoustic', DiffSingerAcousticExporter),
                                                ('variance', DiffSingerVarianceExporter)]:
@@ -186,6 +203,7 @@ def main():
                             actual = session.run(None, {v.name: public_inputs[v.name] for v in session.get_inputs()})
                             assert all(np.isfinite(v).all() for v in actual)
                         records.append({'backbone': kind, 'objective': objective, 'precision': precision,
+                                        'lora_merged': args.lora,
                                         'onnx_execution': precision != 'fp16',
                                         'ort_optimization': ('not_run' if precision == 'fp16' else
                                                              'default' if precision == 'int8' else 'disabled'),

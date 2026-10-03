@@ -83,7 +83,8 @@ class BaseExporter:
     def simplify_graph(self, model, **kwargs):
         import onnx
         import onnxsim
-        if getattr(self.model, '_checkpoint_precision', None) is not None:
+        if (getattr(self.model, '_checkpoint_precision', None) is not None
+                or getattr(self.model, '_lora_merged', False)):
             # Deployment stages contain dynamic loops and captured parent
             # values. Preserve validated graphs: simplifier folding can either
             # be very expensive or break these references in optimized models.

@@ -90,5 +90,13 @@ finetune_ckpt_path: null
 finetune_ignored_params: []
 finetune_strict_shapes: true
 
+lora:
+  enabled: false
+  base_ckpt: null
+  rank: 8
+  alpha: 16
+  target_modules: [linear]
+  train_bias: false
+
 freezing_enabled: false
 frozen_params: []

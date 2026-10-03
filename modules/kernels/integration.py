@@ -158,6 +158,10 @@ def _patch_backbone_fn(backbone_fn, glu_type):
     Returns:
         Number of blocks patched (0 if not a LYNXNet2).
     """
+    from utils.lora import LoRALinear
+    if any(isinstance(module, LoRALinear) for module in backbone_fn.modules()):
+        warnings.warn('LoRA backbone retains eager Linear calls to preserve adapter gradients.', stacklevel=2)
+        return 0
     from modules.backbones.lynxnet2 import LYNXNet2
     from modules.backbones.dit import DiT
     if isinstance(backbone_fn, DiT):

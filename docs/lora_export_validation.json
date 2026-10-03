@@ -1,0 +1,162 @@
+[
+  {
+    "backbone": "wavenet",
+    "objective": "ddpm",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "acoustic",
+    "stages": 2
+  },
+  {
+    "backbone": "wavenet",
+    "objective": "ddpm",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "variance",
+    "stages": 8
+  },
+  {
+    "backbone": "wavenet",
+    "objective": "reflow",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "acoustic",
+    "stages": 2
+  },
+  {
+    "backbone": "wavenet",
+    "objective": "reflow",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "variance",
+    "stages": 8
+  },
+  {
+    "backbone": "lynxnet",
+    "objective": "ddpm",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "acoustic",
+    "stages": 2
+  },
+  {
+    "backbone": "lynxnet",
+    "objective": "ddpm",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "variance",
+    "stages": 8
+  },
+  {
+    "backbone": "lynxnet",
+    "objective": "reflow",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "acoustic",
+    "stages": 2
+  },
+  {
+    "backbone": "lynxnet",
+    "objective": "reflow",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "variance",
+    "stages": 8
+  },
+  {
+    "backbone": "lynxnet2",
+    "objective": "ddpm",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "acoustic",
+    "stages": 2
+  },
+  {
+    "backbone": "lynxnet2",
+    "objective": "ddpm",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "variance",
+    "stages": 8
+  },
+  {
+    "backbone": "lynxnet2",
+    "objective": "reflow",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "acoustic",
+    "stages": 2
+  },
+  {
+    "backbone": "lynxnet2",
+    "objective": "reflow",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "variance",
+    "stages": 8
+  },
+  {
+    "backbone": "dit",
+    "objective": "ddpm",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "acoustic",
+    "stages": 2
+  },
+  {
+    "backbone": "dit",
+    "objective": "ddpm",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "variance",
+    "stages": 8
+  },
+  {
+    "backbone": "dit",
+    "objective": "reflow",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "acoustic",
+    "stages": 2
+  },
+  {
+    "backbone": "dit",
+    "objective": "reflow",
+    "precision": "fp32",
+    "lora_merged": true,
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "variance",
+    "stages": 8
+  }
+]

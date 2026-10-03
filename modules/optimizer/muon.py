@@ -167,7 +167,8 @@ def get_params_for_muon(model) -> List[Parameter]:
     Returns:
         A list of parameters that should be optimized with muon.
     """
-    excluded_module_classes = (nn.Embedding, AdamWLinear, AdamWConv1d)
+    from utils.lora import LoRALinear
+    excluded_module_classes = (nn.Embedding, AdamWLinear, AdamWConv1d, LoRALinear)
     muon_params = []
     # BFS through all submodules and exclude parameters from certain module types
     queue = collections.deque([model])
@@ -191,7 +192,7 @@ class Muon_AdamW(ChainedOptimizer):
         muon_params_id_set = set(id(p) for p in get_params_for_muon(model))
         spec_muon = OptimizerSpec(Muon, muon_args, lambda param: id(param) in muon_params_id_set)
         spec_adamw = OptimizerSpec(torch.optim.AdamW, adamw_args, None)
-        specs = [spec_muon, spec_adamw]
+        specs = [spec_muon, spec_adamw] if muon_params_id_set else [spec_adamw]
         callback = None
         if verbose:
             callback = lambda p, spec_idx: print(

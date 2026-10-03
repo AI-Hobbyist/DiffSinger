@@ -73,6 +73,11 @@ class BaseTask(pl.LightningModule):
 
         self.phoneme_dictionary = load_phoneme_dictionary()
         self.build_model()
+        if hparams.get('lora', {}).get('enabled', False):
+            from utils.lora import setup_lora_training
+            matched = setup_lora_training(self.model, hparams['lora'], hparams['work_dir'])
+            rank_zero_info('LoRA: matched %d linear modules; %d trainable parameters',
+                           len(matched), sum(p.numel() for p in self.model.parameters() if p.requires_grad))
 
         self.valid_losses = nn.ModuleDict()
         self.valid_metrics = nn.ModuleDict()
@@ -169,6 +174,9 @@ class BaseTask(pl.LightningModule):
         raise NotImplementedError()
 
     def build_model(self):
+        if hparams.get('lora', {}).get('enabled', False) and (
+                hparams['finetune_enabled'] or hparams['freezing_enabled']):
+            raise ValueError('LoRA controls base loading and freezing; disable finetune_enabled and freezing_enabled.')
         self.model = self._build_model()
         # utils.load_warp(self)
         self.unfreeze_all_params()
@@ -470,12 +478,20 @@ class BaseTask(pl.LightningModule):
             trainer.test(task)
 
     def on_save_checkpoint(self, checkpoint):
+        if hparams.get('lora', {}).get('enabled', False):
+            from utils.lora import lora_metadata
+            checkpoint['lora'] = lora_metadata(self.model)
         if isinstance(self.model, CategorizedModule):
             checkpoint['category'] = self.model.category
         stage = self.trainer.state.stage
         checkpoint['trainer_stage'] = stage.value if stage is not None else ''
 
     def on_load_checkpoint(self, checkpoint):
+        if hparams.get('lora', {}).get('enabled', False):
+            from utils.lora import lora_metadata
+            expected = lora_metadata(self.model)
+            if checkpoint.get('lora') != expected:
+                raise ValueError('LoRA resume requires the same adapter modules, rank and alpha.')
         from lightning.pytorch.trainer.states import RunningStage
         from utils import simulate_lr_scheduler
         if checkpoint.get('trainer_stage', '') == RunningStage.VALIDATING.value:
