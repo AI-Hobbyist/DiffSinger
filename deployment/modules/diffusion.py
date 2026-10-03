@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import torch
 from torch import Tensor
@@ -102,7 +102,8 @@ class GaussianDiffusionONNX(GaussianDiffusion):
         b = (self.spec_max + self.spec_min) / 2.
         return x * k + b
 
-    def forward(self, condition, x_start=None, depth=None, steps: int = 10):
+    def forward(self, condition: Tensor, x_start: Optional[Tensor] = None,
+                depth: Optional[Tensor] = None, steps: int = 10):
         condition = condition.transpose(1, 2)  # [1, T, H] => [1, H, T]
         device = condition.device
         n_frames = condition.shape[2]
@@ -110,11 +111,13 @@ class GaussianDiffusionONNX(GaussianDiffusion):
         noise = torch.randn((1, self.num_feats, self.out_dims, n_frames), device=device)
         if x_start is None:
             speedup = max(1, self.timesteps // steps)
-            speedup = self.timestep_factors[torch.sum(self.timestep_factors <= speedup) - 1]
+            speedup = int(self.timestep_factors[torch.sum(self.timestep_factors <= speedup) - 1])
             step_range = torch.arange(0, self.k_step, speedup, dtype=torch.long, device=device).flip(0)[:, None]
             x = noise
         else:
-            depth_int64 = min(torch.round(depth * self.timesteps).long(), self.k_step)
+            if depth is None:
+                raise ValueError('depth is required with x_start')
+            depth_int64 = min(int(torch.round(depth * self.timesteps)), self.k_step)
             speedup = max(1, depth_int64 // steps)
             depth_int64 = depth_int64 // speedup * speedup  # make depth_int64 a multiple of speedup
             step_range = torch.arange(0, depth_int64, speedup, dtype=torch.long, device=device).flip(0)[:, None]

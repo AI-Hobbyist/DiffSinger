@@ -205,6 +205,33 @@ def model_add_prefixes(
     _add_prefixes_recursive(model.graph)
 
 
+def prefix_internal_values(model: ModelProto, prefix: str):
+    """Give stages disjoint internal names while preserving their public I/O."""
+    public = {v.name for v in list(model.graph.input) + list(model.graph.output)}
+    graphs = []
+
+    def collect(graph):
+        graphs.append(graph)
+        for node in graph.node:
+            for attribute in node.attribute:
+                if attribute.type == onnx.AttributeProto.GRAPH:
+                    collect(attribute.g)
+
+    collect(model.graph)
+    internal = {name for graph in graphs for node in graph.node for name in node.output if name}
+    internal.update(v.name for graph in graphs for v in graph.initializer)
+    internal.update(v.name for graph in graphs[1:] for v in graph.input)
+    names = {name: prefix + name for name in internal - public}
+    for graph in graphs:
+        for value in list(graph.initializer) + list(graph.value_info) + list(graph.input) + list(graph.output):
+            value.name = names.get(value.name, value.name)
+        for node in graph.node:
+            node.name = prefix + node.name
+            for edges in (node.input, node.output):
+                for index, name in enumerate(edges):
+                    edges[index] = names.get(name, name)
+
+
 def graph_fold_back_to_squeeze(graph: GraphProto):
     """
     Fold the substructures of 'Shape', 'Gather', 'Equal', 'If' to one single 'Squeeze' node.

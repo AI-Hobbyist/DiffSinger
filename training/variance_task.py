@@ -14,14 +14,17 @@ from modules.metrics import (
 )
 from modules.toplevel import DiffSingerVariance
 from utils.hparams import hparams
+from lightning.pytorch.utilities.combined_loader import CombinedLoader
+from utils.training_utils import DsBatchSampler
+from utils.aux_dataset import AUX_MODULES, parse_aux_dataset_config, get_aux_binary_data_dir
 from utils.plot import dur_to_figure, pitch_note_to_figure, curve_to_figure
 
 matplotlib.use('Agg')
 
 
 class VarianceDataset(BaseDataset):
-    def __init__(self, prefix, preload=False):
-        super(VarianceDataset, self).__init__(prefix, hparams['dataset_size_key'], preload)
+    def __init__(self, prefix, preload=False, data_dir=None):
+        super(VarianceDataset, self).__init__(prefix, hparams['dataset_size_key'], preload, data_dir=data_dir)
         need_energy = hparams['predict_energy']
         need_breathiness = hparams['predict_breathiness']
         need_voicing = hparams['predict_voicing']
@@ -84,6 +87,11 @@ class VarianceTask(BaseTask):
     def __init__(self):
         super().__init__()
         self.dataset_cls = VarianceDataset
+        self.aux_config = parse_aux_dataset_config(
+            hparams.get("aux_datasets", {}),
+            enabled_modules={name for name in AUX_MODULES if hparams.get(f"predict_{name}", False)}
+        )
+        self.aux_training_sampler = None
 
         self.diffusion_type = hparams['diffusion_type']
 
@@ -115,9 +123,12 @@ class VarianceTask(BaseTask):
         self.lambda_var_loss = hparams['lambda_var_loss']
         super()._finish_init()
 
+        self._patch_variance_fused_kernels()
+
+    def _patch_variance_fused_kernels(self):
         # ── Fuse LYNXNet2 backbone kernels (in-place) ──
-        self._fused_kernels_patched = 0
-        self._fused_kernel_backbones = []
+        self._variance_fused_kernels_patched = 0
+        self._variance_fused_kernel_backbones = []
         if hparams.get('use_fused_kernels', False):
             try:
                 from modules.backbones.lynxnet2 import LYNXNet2
@@ -131,17 +142,17 @@ class VarianceTask(BaseTask):
                     ('pitch_predictor', 'pitch_prediction_args'),
                     ('variance_predictor', 'variances_prediction_args'),
                 ):
-                    predictor = getattr(self.model, predictor_attr, None)
+                    predictor = getattr(getattr(self.model, 'variance', self.model), predictor_attr, None)
                     if predictor is None:
                         continue
                     glu = (hparams.get(args_key) or {}).get('backbone_args', {}).get('glu_type', 'swiglu')
                     n = patch_diffusion_module(predictor, glu_type=glu)
-                    self._fused_kernels_patched += n
+                    self._variance_fused_kernels_patched += n
                     if n > 0:
                         for attr in ('denoise_fn', 'velocity_fn'):
                             backbone = getattr(predictor, attr, None)
                             if isinstance(backbone, LYNXNet2):
-                                self._fused_kernel_backbones.append(backbone)
+                                self._variance_fused_kernel_backbones.append(backbone)
                     rank_zero_info(
                         'Fused kernels: patched %d LYNXNet2 blocks in %s (glu_type=%s)',
                         n, predictor_attr, glu
@@ -154,10 +165,10 @@ class VarianceTask(BaseTask):
         # Warm Triton autotune caches after the model is on its CUDA device,
         # so the first training steps don't pay the per-bucket benchmark cost.
         # Mirrors AcousticTask.on_fit_start, but sweeps both predictors.
-        if self._fused_kernels_patched > 0 and self.device.type == 'cuda':
+        if self._variance_fused_kernels_patched > 0 and self.device.type == 'cuda':
             from modules.kernels.integration import warmup_fused_backbones
             warmup_fused_backbones(
-                self._fused_kernel_backbones,
+                self._variance_fused_kernel_backbones,
                 max_frames=hparams['max_batch_frames'],
                 precision=self.trainer.precision,
             )
@@ -206,7 +217,9 @@ class VarianceTask(BaseTask):
             for name in self.variance_prediction_list:
                 self.register_validation_metric(f'{name}_r2', RawCurveR2Score())
 
-    def run_model(self, sample, infer=False):
+    def run_model(self, sample, infer=False, modules=None, model=None):
+        modules = AUX_MODULES if modules is None else set(modules)
+        model = self.model if model is None else model
         spk_ids = sample['spk_ids'] if self.use_spk_id else None  # [B,]
         languages = sample['languages'] if self.use_lang_id else None  # [B,]
         txt_tokens = sample['tokens']  # [B, T_ph]
@@ -242,7 +255,7 @@ class VarianceTask(BaseTask):
                     for v_name in self.variance_prediction_list
                 }
 
-        output = self.model(
+        output = model(
             txt_tokens, languages=languages,
             midi=midi, ph2word=ph2word,
             ph_dur=ph_dur, mel2ph=mel2ph,
@@ -261,10 +274,10 @@ class VarianceTask(BaseTask):
             return dur_pred, pitch_pred, variances_pred  # Tensor, Tensor, Dict[str, Tensor]
         else:
             losses = {}
-            if dur_pred is not None:
+            if dur_pred is not None and 'dur' in modules:
                 losses['dur_loss'] = self.lambda_dur_loss * self.dur_loss(dur_pred, ph_dur, ph2word=ph2word)
             non_padding = (mel2ph > 0).unsqueeze(-1) if mel2ph is not None else None
-            if pitch_pred is not None:
+            if pitch_pred is not None and 'pitch' in modules:
                 if self.diffusion_type == 'ddpm':
                     pitch_x_recon, pitch_noise = pitch_pred
                     pitch_loss = self.pitch_loss(
@@ -278,16 +291,26 @@ class VarianceTask(BaseTask):
                 else:
                     raise ValueError(f"Unknown diffusion type: {self.diffusion_type}")
                 losses['pitch_loss'] = self.lambda_pitch_loss * pitch_loss
-            if variances_pred is not None:
+            selected_variances = [
+                name for name in self.variance_prediction_list if name in modules
+            ]
+            if variances_pred is not None and selected_variances:
+                variance_mask = torch.tensor(
+                    [name in selected_variances for name in self.variance_prediction_list],
+                    device=mel2ph.device,
+                    dtype=torch.bool
+                )[None, :]
                 if self.diffusion_type == 'ddpm':
                     var_x_recon, var_noise = variances_pred
                     var_loss = self.var_loss(
-                        var_x_recon, var_noise, non_padding=non_padding
+                        var_x_recon, var_noise,
+                        non_padding=non_padding, feature_mask=variance_mask
                     )
                 elif self.diffusion_type == 'reflow':
                     var_v_pred, var_v_gt, t = variances_pred
                     var_loss = self.var_loss(
-                        var_v_pred, var_v_gt, t=t, non_padding=non_padding
+                        var_v_pred, var_v_gt, t=t,
+                        non_padding=non_padding, feature_mask=variance_mask
                     )
                 else:
                     raise ValueError(f"Unknown diffusion type: {self.diffusion_type}")
@@ -295,17 +318,22 @@ class VarianceTask(BaseTask):
 
             return losses
 
-    def _validation_step(self, sample, batch_idx):
-        losses = self.run_model(sample, infer=False)
-        if min(sample['indices']) < hparams['num_valid_plots']:
+    def _validation_step(self, sample, batch_idx, modules=None, plot=True, model=None):
+        modules = AUX_MODULES if modules is None else set(modules)
+        losses = VarianceTask.run_model(
+            self, sample, infer=False, modules=modules, model=model
+        )
+        if plot and min(sample['indices']) < hparams['num_valid_plots']:
             def sample_get(key, idx, abs_idx):
                 return sample[key][idx][:self.valid_dataset.metadata[key][abs_idx]].unsqueeze(0)
 
-            dur_preds, pitch_preds, variances_preds = self.run_model(sample, infer=True)
+            dur_preds, pitch_preds, variances_preds = VarianceTask.run_model(
+                self, sample, infer=True, model=model
+            )
             for i in range(len(sample['indices'])):
                 data_idx = sample['indices'][i]
                 if data_idx < hparams['num_valid_plots']:
-                    if dur_preds is not None:
+                    if dur_preds is not None and 'dur' in modules:
                         dur_len = self.valid_dataset.metadata['ph_dur'][data_idx]
                         tokens = sample_get('tokens', i, data_idx)
                         gt_dur = sample_get('ph_dur', i, data_idx)
@@ -318,18 +346,20 @@ class VarianceTask(BaseTask):
                         self.valid_metrics['ph_dur_acc'].update(
                             pdur_pred=pred_dur, pdur_target=gt_dur, ph2word=ph2word, mask=mask
                         )
-                        self.plot_dur(
+                        VarianceTask.plot_dur(
+                            self,
                             data_idx, gt_dur, pred_dur,
                             txt=self.valid_dataset.metadata['ph_texts'][data_idx].split()
                         )
-                    if pitch_preds is not None:
+                    if pitch_preds is not None and 'pitch' in modules:
                         pitch_len = self.valid_dataset.metadata['pitch'][data_idx]
                         pred_pitch = sample_get('base_pitch', i, data_idx) + pitch_preds[i][:pitch_len].unsqueeze(0)
                         gt_pitch = sample_get('pitch', i, data_idx)
                         mask = (sample_get('mel2ph', i, data_idx) > 0) & ~sample_get('uv', i, data_idx)
                         self.valid_metrics['pitch_acc'].update(pred=pred_pitch, target=gt_pitch, mask=mask)
                         self.valid_metrics['pitch_r2'].update(pred=pred_pitch, target=gt_pitch, mask=mask)
-                        self.plot_pitch(
+                        VarianceTask.plot_pitch(
+                            self,
                             data_idx,
                             gt_pitch=gt_pitch,
                             pred_pitch=pred_pitch,
@@ -338,12 +368,15 @@ class VarianceTask(BaseTask):
                             note_rest=sample_get('note_rest', i, data_idx)
                         )
                     for name in self.variance_prediction_list:
+                        if name not in modules:
+                            continue
                         variance_len = self.valid_dataset.metadata[name][data_idx]
                         gt_variances = sample[name][i][:variance_len].unsqueeze(0)
                         pred_variances = variances_preds[name][i][:variance_len].unsqueeze(0)
                         mask = (sample_get('mel2ph', i, data_idx) > 0) & ~sample_get('uv', i, data_idx)
                         self.valid_metrics[f'{name}_r2'].update(pred=pred_variances, target=gt_variances, mask=mask)
-                        self.plot_curve(
+                        VarianceTask.plot_curve(
+                            self,
                             data_idx,
                             gt_curve=gt_variances,
                             pred_curve=pred_variances,
@@ -382,3 +415,94 @@ class VarianceTask(BaseTask):
         self.logger.all_rank_experiment.add_figure(f'{curve_name}_{data_idx}', curve_to_figure(
             gt_curve, pred_curve, base_curve, grid=grid, title=title_text
         ), self.global_step)
+
+    def setup(self, stage):
+        super().setup(stage)
+        if self.aux_config is None:
+            return
+        self.aux_train_dataset = self._build_aux_dataset('train')
+        self.aux_valid_dataset = self._build_aux_dataset('valid')
+
+    def _build_aux_dataset(self, prefix):
+        data_dir = get_aux_binary_data_dir(hparams['binary_data_dir'])
+        if not (data_dir / f'{prefix}.meta').is_file():
+            raise FileNotFoundError(
+                f'Auxiliary dataset metadata not found: {data_dir / f"{prefix}.meta"}. '
+                f'Run scripts/binarize.py with aux_datasets enabled first.'
+            )
+        return VarianceDataset(prefix, data_dir=data_dir)
+
+    def _build_aux_dataloader(self, dataset, training):
+        sampler = DsBatchSampler(
+            dataset,
+            max_batch_frames=self.max_batch_frames if training else self.max_val_batch_frames,
+            max_batch_size=self.max_batch_size if training else self.max_val_batch_size,
+            num_replicas=self.num_replicas,
+            rank=self.global_rank,
+            sort_by_similar_size=hparams['sort_by_len'] if training else False,
+            size_reversed=training,
+            required_batch_count_multiple=hparams['accumulate_grad_batches'] if training else 1,
+            shuffle_sample=training,
+            shuffle_batch=training,
+            disallow_empty_batch=training,
+            pad_batch_assignment=training
+        )
+        if training:
+            self.aux_training_sampler = sampler
+        return torch.utils.data.DataLoader(
+            dataset,
+            collate_fn=dataset.collater,
+            batch_sampler=sampler,
+            num_workers=hparams['ds_workers'],
+            prefetch_factor=(hparams['dataloader_prefetch_factor'] if hparams['ds_workers'] > 0 else None),
+            pin_memory=True,
+            persistent_workers=(hparams['ds_workers'] > 0)
+        )
+
+    def train_dataloader(self):
+        main_loader = super().train_dataloader()
+        if self.aux_config is None:
+            return main_loader
+        aux_loader = self._build_aux_dataloader(self.aux_train_dataset, training=True)
+        return CombinedLoader({'main': main_loader, 'aux': aux_loader}, mode='max_size_cycle')
+
+    def val_dataloader(self):
+        main_loader = super().val_dataloader()
+        if self.aux_config is None or self.aux_valid_dataset is None:
+            return main_loader
+        return [main_loader, self._build_aux_dataloader(self.aux_valid_dataset, training=False)]
+
+    def on_train_epoch_start(self):
+        super().on_train_epoch_start()
+        if self.aux_training_sampler is not None:
+            self.aux_training_sampler.set_epoch(self.current_epoch)
+
+    def _training_step(self, sample):
+        if self.aux_config is None:
+            return super()._training_step(sample)
+        main_modules = AUX_MODULES - self.aux_config['modules']
+        main_losses = self.run_model(sample['main'], modules=main_modules)
+        aux_losses = self.run_model(sample['aux'], modules=self.aux_config['modules'])
+        losses = main_losses.copy()
+        for name, value in aux_losses.items():
+            losses[name] = losses.get(name, 0) + value
+        batch_size = sample['main']['size'] + sample['aux']['size']
+        return sum(losses.values()), {**losses, 'batch_size': float(batch_size)}
+
+    def validation_step(self, sample, batch_idx, dataloader_idx=0):
+        if self.aux_config is None:
+            return super().validation_step(sample, batch_idx)
+        modules = (
+            AUX_MODULES - self.aux_config['modules']
+            if dataloader_idx == 0 else self.aux_config['modules']
+        )
+        if sample['size'] > 0:
+            with torch.autocast(self.device.type, enabled=False):
+                losses, weight = self._validation_step(
+                    sample, batch_idx, modules=modules, plot=dataloader_idx == 0
+                )
+            if not losses:
+                return
+            losses = {'total_loss': sum(losses.values()), **losses}
+            for name, value in losses.items():
+                self.valid_losses[name].update(value, weight=weight)

@@ -42,7 +42,7 @@ class ConvNeXtBlock(nn.Module):
     def forward(self, x: torch.Tensor, ) -> torch.Tensor:
         residual = x
         x = self.dwconv(x)
-        x = x.transpose(1, 2)  # (B, C, T) -> (B, T, C)
+        x = x.permute(0, 2, 1)  # (B, C, T) -> (B, T, C)
 
         x = self.norm(x)
         x = self.pwconv1(x)
@@ -50,7 +50,7 @@ class ConvNeXtBlock(nn.Module):
         x = self.pwconv2(x)
         if self.gamma is not None:
             x = self.gamma * x
-        x = x.transpose(1, 2)  # (B, T, C) -> (B, C, T)
+        x = x.permute(0, 2, 1)  # (B, T, C) -> (B, C, T)
         x = self.dropout(x)
 
         x = residual + self.drop_path(x)
@@ -80,10 +80,10 @@ class ConvNeXtDecoder(nn.Module):
 
     # noinspection PyUnusedLocal
     def forward(self, x, infer=False):
-        x = x.transpose(1, 2)
+        x = x.permute(0, 2, 1)
         x = self.inconv(x)
         for conv in self.conv:
             x = conv(x)
         x = self.outconv(x)
-        x = x.transpose(1, 2)
+        x = x.permute(0, 2, 1)
         return x

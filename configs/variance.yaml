@@ -154,3 +154,7 @@ finetune_strict_shapes: true
 
 freezing_enabled: false
 frozen_params: []
+
+# Optional module-specific auxiliary variance supervision.
+aux_datasets:
+  enable: false

@@ -13,9 +13,9 @@ from .utils import to_local_average_f0, to_viterbi_f0
 
 
 class RMVPE(BasePE):
-    def __init__(self, model_path, hop_length=160):
+    def __init__(self, model_path, hop_length=160, device=None):
         self.resample_kernel = {}
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.device = torch.device(device if device is not None else ('cuda' if torch.cuda.is_available() else 'cpu'))
         self.model = E2E0(4, 1, (2, 2)).eval().to(self.device)
         ckpt = torch.load(model_path, map_location=self.device)
         self.model.load_state_dict(ckpt['model'], strict=False)

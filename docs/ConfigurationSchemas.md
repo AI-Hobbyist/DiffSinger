@@ -250,6 +250,10 @@ Available arguments for each backbone type are listed below.
 | glu_type | str | `atanglu` | Type of gated linear unit activation. Choose from `swiglu` for SwiGLU, `atanglu` for ATanGLU, `softsign_glu` for SoftSignGLU |
 | expansion_factor | int | 1 | Channel expansion factor within each gated block (not commonly overridden) |
 
+**DiT** (`backbone_type: dit`)
+
+See [DiT and all-in-one training](DiTAndAllInOne.md) for parameter constraints, masks, dual timesteps, and templates, and [Model scaling](ModelScaling.md) for size references.
+
 ### backbone_type
 
 Backbone type of the main decoder/predictor module.
@@ -260,7 +264,7 @@ Backbone type of the main decoder/predictor module.
 <tr><td align="center"><b>customizability</b></td><td>normal</td>
 <tr><td align="center"><b>type</b></td><td>str</td>
 <tr><td align="center"><b>default</b></td><td>lynxnet2</td>
-<tr><td align="center"><b>constraints</b></td><td>Choose from 'wavenet', 'lynxnet', 'lynxnet2'.</td>
+<tr><td align="center"><b>constraints</b></td><td>Choose from 'wavenet', 'lynxnet', 'lynxnet2', 'dit'.</td>
 </tbody></table>
 
 ### base_config
@@ -1460,7 +1464,7 @@ Equivalent to [backbone_type](#backbone_type) but only for the pitch predictor m
 <tr><td align="center"><b>customizability</b></td><td>normal</td>
 <tr><td align="center"><b>type</b></td><td>str</td>
 <tr><td align="center"><b>default</b></td><td>lynxnet2</td>
-<tr><td align="center"><b>constraints</b></td><td>Choose from 'wavenet', 'lynxnet', 'lynxnet2'.</td>
+<tr><td align="center"><b>constraints</b></td><td>Choose from 'wavenet', 'lynxnet', 'lynxnet2', 'dit'.</td>
 </tbody></table>
 
 ### pitch_prediction_args.pitd_clip_max
@@ -2257,7 +2261,7 @@ Equivalent to [backbone_type](#backbone_type) but only for the multi-variance pr
 <tr><td align="center"><b>customizability</b></td><td>normal</td>
 <tr><td align="center"><b>type</b></td><td>str</td>
 <tr><td align="center"><b>default</b></td><td>lynxnet2</td>
-<tr><td align="center"><b>constraints</b></td><td>Choose from 'wavenet', 'lynxnet', 'lynxnet2'.</td>
+<tr><td align="center"><b>constraints</b></td><td>Choose from 'wavenet', 'lynxnet', 'lynxnet2', 'dit'.</td>
 </tbody></table>
 
 ### variances_prediction_args.total_repeat_bins
@@ -2344,3 +2348,8 @@ Window size for mel or feature extraction.
 <tr><td align="center"><b>type</b></td><td>int</td>
 <tr><td align="center"><b>default</b></td><td>2048</td>
 </tbody></table>
+
+
+### 通用 joint 模式、辅助语料与训练单位
+
+`all_in_one.enabled: true` 自动选择 joint task/binarizer；所有 backbone 以及混合 backbone 均可使用。`aux_datasets` 支持独立 variance 和 joint 训练的模块级辅助监督。`max_updates` / `val_check_interval` 支持整数 step、`Nstep` 和 `Nep`，可以切换单位恢复。预处理设备、每 GPU worker 限制与 CUDA cache 释放同样与训练 backbone 无关。完整配置和语义见 [DiT 与通用训练模式](DiTAndAllInOne.md)。

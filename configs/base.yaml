@@ -53,8 +53,8 @@ num_ckpt_keep: 5
 accumulate_grad_batches: 1
 log_interval: 100
 num_sanity_val_steps: 1  # steps of validation at the beginning
-val_check_interval: 4000
-max_updates: 100000
+val_check_interval: 4000  # optimizer steps; also accepts "Nstep" or "Nep"
+max_updates: 100000       # optimizer steps; "100ep" stops after 100 epochs
 max_batch_frames: 50000
 max_batch_size: 100000
 max_val_batch_frames: 60000

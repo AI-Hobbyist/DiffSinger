@@ -29,20 +29,24 @@ from utils.pitch_utils import interp_f0
 class DiffSingerVarianceInfer(BaseSVSInfer):
     def __init__(
             self, device=None, ckpt_steps=None,
-            predictions: set = None
+            predictions: set = None, model=None, spk_map=None, lang_map=None
     ):
         super().__init__(device=device)
         self.phoneme_dictionary = load_phoneme_dictionary()
-        if hparams['use_spk_id']:
+        if hparams['use_spk_id'] and spk_map is None:
             with open(pathlib.Path(hparams['work_dir']) / 'spk_map.json', 'r', encoding='utf8') as f:
                 self.spk_map = json.load(f)
             assert isinstance(self.spk_map, dict) and len(self.spk_map) > 0, 'Invalid or empty speaker map!'
             assert len(self.spk_map) == len(set(self.spk_map.values())), 'Duplicate speaker id in speaker map!'
+        if spk_map is not None:
+            self.spk_map = spk_map
         lang_map_fn = pathlib.Path(hparams['work_dir']) / 'lang_map.json'
         if lang_map_fn.exists():
             with open(lang_map_fn, 'r', encoding='utf8') as f:
                 self.lang_map = json.load(f)
-        self.model: DiffSingerVariance = self.build_model(ckpt_steps=ckpt_steps)
+        if lang_map is not None:
+            self.lang_map = lang_map
+        self.model = model if model is not None else self.build_model(ckpt_steps=ckpt_steps)
         self.lr = LengthRegulator()
         self.rr = RhythmRegulator()
         smooth_kernel_size = round(hparams['midi_smooth_width'] / self.timestep)
@@ -53,7 +57,7 @@ class DiffSingerVarianceInfer(BaseSVSInfer):
             bias=False,
             padding='same',
             padding_mode='replicate'
-        ).eval().to(self.device)
+        ).eval()
         smooth_kernel = torch.sin(torch.from_numpy(
             np.linspace(0, 1, smooth_kernel_size).astype(np.float32) * np.pi
         ).to(self.device))
@@ -82,7 +86,7 @@ class DiffSingerVarianceInfer(BaseSVSInfer):
         ).eval().to(self.device)
         load_ckpt(model, hparams['work_dir'], ckpt_steps=ckpt_steps,
                   prefix_in_ckpt='model', strict=True, device=self.device)
-        return model
+        return model.to(self.device)
 
     @torch.no_grad()
     def preprocess_input(

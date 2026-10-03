@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import torch
 
@@ -34,15 +34,18 @@ class RectifiedFlowONNX(RectifiedFlow):
         b = (self.spec_max + self.spec_min) / 2.
         return x * k + b
 
-    def forward(self, condition, x_end=None, depth=None, steps: int = 10):
+    def forward(self, condition: torch.Tensor, x_end: Optional[torch.Tensor] = None,
+                depth: Optional[torch.Tensor] = None, steps: int = 10):
         condition = condition.transpose(1, 2)  # [1, T, H] => [1, H, T]
         device = condition.device
         n_frames = condition.shape[2]
         noise = torch.randn((1, self.num_feats, self.out_dims, n_frames), device=device)
         if x_end is None:
-            t_start = 0.
+            t_start = torch.tensor(0., dtype=torch.float32, device=device)
             x = noise
         else:
+            if depth is None:
+                raise ValueError('Shallow Reflow requires depth.')
             t_start = torch.max(1 - depth, torch.tensor(self.t_start, dtype=torch.float32, device=device))
             x_end = self.norm_spec(x_end).transpose(-2, -1)
             if self.num_feats == 1:

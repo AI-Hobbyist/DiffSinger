@@ -19,9 +19,9 @@ from utils.phoneme_utils import load_phoneme_dictionary
 
 
 class DiffSingerAcousticInfer(BaseSVSInfer):
-    def __init__(self, device=None, load_model=True, load_vocoder=True, ckpt_steps=None):
+    def __init__(self, device=None, load_model=True, load_vocoder=True, ckpt_steps=None, model=None, spk_map=None, lang_map=None):
         super().__init__(device=device)
-        if load_model:
+        if load_model or model is not None:
             self.variance_checklist = []
 
             self.variances_to_embed = set()
@@ -36,16 +36,20 @@ class DiffSingerAcousticInfer(BaseSVSInfer):
                 self.variances_to_embed.add('tension')
 
             self.phoneme_dictionary = load_phoneme_dictionary()
-            if hparams['use_spk_id']:
+            if hparams['use_spk_id'] and spk_map is None:
                 with open(pathlib.Path(hparams['work_dir']) / 'spk_map.json', 'r', encoding='utf8') as f:
                     self.spk_map = json.load(f)
                 assert isinstance(self.spk_map, dict) and len(self.spk_map) > 0, 'Invalid or empty speaker map!'
                 assert len(self.spk_map) == len(set(self.spk_map.values())), 'Duplicate speaker id in speaker map!'
+            if spk_map is not None:
+                self.spk_map = spk_map
             lang_map_fn = pathlib.Path(hparams['work_dir']) / 'lang_map.json'
             if lang_map_fn.exists():
                 with open(lang_map_fn, 'r', encoding='utf8') as f:
                     self.lang_map = json.load(f)
-            self.model = self.build_model(ckpt_steps=ckpt_steps)
+            if lang_map is not None:
+                self.lang_map = lang_map
+            self.model = model if model is not None else self.build_model(ckpt_steps=ckpt_steps)
             self.lr = LengthRegulator().to(self.device)
         if load_vocoder:
             self.vocoder = self.build_vocoder()
@@ -54,10 +58,10 @@ class DiffSingerAcousticInfer(BaseSVSInfer):
         model = DiffSingerAcoustic(
             vocab_size=len(self.phoneme_dictionary),
             out_dims=hparams['audio_num_mel_bins']
-        ).eval().to(self.device)
+        ).eval()
         load_ckpt(model, hparams['work_dir'], ckpt_steps=ckpt_steps,
                   prefix_in_ckpt='model', strict=True, device=self.device)
-        return model
+        return model.to(self.device)
 
     def build_vocoder(self):
         if hparams['vocoder'] in VOCODERS:

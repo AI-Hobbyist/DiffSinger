@@ -1,0 +1,93 @@
+{
+  "device": "NVIDIA GeForce RTX 5060 Laptop GPU",
+  "torch": "2.11.0+cu130",
+  "configuration": "synthetic all-in-one, hidden16, backbone L1 D16, mel4, frames4, Reflow Euler 1 step, batch1, shallow decoder enabled, no vocoder",
+  "warmup": 3,
+  "iterations": 5,
+  "results": [
+    {
+      "backbone": "wavenet",
+      "precision": "fp32",
+      "weight_mib": 57.960453033447266,
+      "peak_allocated_mib": 72.90966796875,
+      "median_ms": 37.43369999938295
+    },
+    {
+      "backbone": "wavenet",
+      "precision": "fp16",
+      "weight_mib": 28.980226516723633,
+      "peak_allocated_mib": 43.560546875,
+      "median_ms": 44.41269999915676
+    },
+    {
+      "backbone": "wavenet",
+      "precision": "int8",
+      "weight_mib": 14.598427772521973,
+      "peak_allocated_mib": 31.2431640625,
+      "median_ms": 99.7427999991487
+    },
+    {
+      "backbone": "lynxnet",
+      "precision": "fp32",
+      "weight_mib": 57.961368560791016,
+      "peak_allocated_mib": 72.9169921875,
+      "median_ms": 48.720199998570024
+    },
+    {
+      "backbone": "lynxnet",
+      "precision": "fp16",
+      "weight_mib": 28.980684280395508,
+      "peak_allocated_mib": 43.56787109375,
+      "median_ms": 36.27109999979439
+    },
+    {
+      "backbone": "lynxnet",
+      "precision": "int8",
+      "weight_mib": 14.598896980285645,
+      "peak_allocated_mib": 31.2578125,
+      "median_ms": 103.6831000001257
+    },
+    {
+      "backbone": "lynxnet2",
+      "precision": "fp32",
+      "weight_mib": 57.949100494384766,
+      "peak_allocated_mib": 72.90380859375,
+      "median_ms": 30.706800000189105
+    },
+    {
+      "backbone": "lynxnet2",
+      "precision": "fp16",
+      "weight_mib": 28.974550247192383,
+      "peak_allocated_mib": 43.560546875,
+      "median_ms": 45.67299999871466
+    },
+    {
+      "backbone": "lynxnet2",
+      "precision": "int8",
+      "weight_mib": 14.595452308654785,
+      "peak_allocated_mib": 31.251953125,
+      "median_ms": 91.63810000063677
+    },
+    {
+      "backbone": "dit",
+      "precision": "fp32",
+      "weight_mib": 57.970523834228516,
+      "peak_allocated_mib": 72.9228515625,
+      "median_ms": 31.797800000276766
+    },
+    {
+      "backbone": "dit",
+      "precision": "fp16",
+      "weight_mib": 28.985261917114258,
+      "peak_allocated_mib": 43.5693359375,
+      "median_ms": 46.66990000077931
+    },
+    {
+      "backbone": "dit",
+      "precision": "int8",
+      "weight_mib": 14.602250099182129,
+      "peak_allocated_mib": 31.2578125,
+      "median_ms": 106.47790000075474
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.18)
+project(diffsinger_sampler LANGUAGES CXX)
+find_package(Torch REQUIRED)
+add_executable(diffsinger_sampler sampler.cpp)
+target_link_libraries(diffsinger_sampler PRIVATE "${TORCH_LIBRARIES}")
+target_compile_features(diffsinger_sampler PRIVATE cxx_std_17)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")

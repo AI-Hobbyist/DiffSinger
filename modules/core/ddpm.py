@@ -9,7 +9,7 @@ import torch
 from torch import nn
 from tqdm import tqdm
 
-from modules.backbones import build_backbone
+from modules.backbones import build_backbone, run_backbone
 from utils.hparams import hparams
 
 
@@ -138,8 +138,11 @@ class GaussianDiffusion(nn.Module):
         posterior_log_variance_clipped = extract(self.posterior_log_variance_clipped, t, x_t.shape)
         return posterior_mean, posterior_variance, posterior_log_variance_clipped
 
-    def p_mean_variance(self, x, t, cond):
-        noise_pred = self.denoise_fn(x, t, cond=cond)
+    def _run_denoise(self, x, t, cond, valid_mask=None):
+        return run_backbone(self.denoise_fn, x, t, cond, valid_mask=valid_mask)
+
+    def p_mean_variance(self, x, t, cond, valid_mask=None):
+        noise_pred = self._run_denoise(x, t, cond, valid_mask=valid_mask)
         x_recon = self.predict_start_from_noise(x, t=t, noise=noise_pred)
 
         # This is previously inherited from original DiffSinger repository
@@ -150,27 +153,32 @@ class GaussianDiffusion(nn.Module):
         return model_mean, posterior_variance, posterior_log_variance
 
     @torch.no_grad()
-    def p_sample(self, x, t, cond, clip_denoised=True, repeat_noise=False):
+    def p_sample(self, x, t, cond, clip_denoised=True, repeat_noise=False, valid_mask=None):
         b, *_, device = *x.shape, x.device
-        model_mean, _, model_log_variance = self.p_mean_variance(x=x, t=t, cond=cond)
+        model_mean, _, model_log_variance = self.p_mean_variance(
+            x=x, t=t, cond=cond, valid_mask=valid_mask
+        )
         noise = noise_like(x.shape, device, repeat_noise)
         # no noise when t == 0
         nonzero_mask = (1 - (t == 0).float()).reshape(b, *((1,) * (len(x.shape) - 1)))
         return model_mean + nonzero_mask * (0.5 * model_log_variance).exp() * noise
 
     @torch.no_grad()
-    def p_sample_ddim(self, x, t, interval, cond):
+    def p_sample_ddim(self, x, t, interval, cond, valid_mask=None):
         a_t = extract(self.alphas_cumprod, t, x.shape)
         a_prev = extract(self.alphas_cumprod, torch.max(t - interval, torch.zeros_like(t)), x.shape)
 
-        noise_pred = self.denoise_fn(x, t, cond=cond)
+        noise_pred = self._run_denoise(x, t, cond, valid_mask=valid_mask)
         x_prev = a_prev.sqrt() * (
                 x / a_t.sqrt() + (((1 - a_prev) / a_prev).sqrt() - ((1 - a_t) / a_t).sqrt()) * noise_pred
         )
         return x_prev
 
     @torch.no_grad()
-    def p_sample_plms(self, x, t, interval, cond, clip_denoised=True, repeat_noise=False):
+    def p_sample_plms(
+            self, x, t, interval, cond, clip_denoised=True, repeat_noise=False,
+            valid_mask=None
+    ):
         """
         Use the PLMS method from
         [Pseudo Numerical Methods for Diffusion Models on Manifolds](https://arxiv.org/abs/2202.09778).
@@ -188,11 +196,13 @@ class GaussianDiffusion(nn.Module):
             return x_pred
 
         noise_list = self.noise_list
-        noise_pred = self.denoise_fn(x, t, cond=cond)
+        noise_pred = self._run_denoise(x, t, cond, valid_mask=valid_mask)
 
         if len(noise_list) == 0:
             x_pred = get_x_pred(x, noise_pred, t)
-            noise_pred_prev = self.denoise_fn(x_pred, max(t - interval, 0), cond=cond)
+            noise_pred_prev = self._run_denoise(
+                x_pred, max(t - interval, 0), cond, valid_mask=valid_mask
+            )
             noise_pred_prime = (noise_pred + noise_pred_prev) / 2
         elif len(noise_list) == 1:
             noise_pred_prime = (3 * noise_pred - noise_list[-1]) / 2
@@ -212,16 +222,16 @@ class GaussianDiffusion(nn.Module):
                 extract(self.sqrt_one_minus_alphas_cumprod, t, x_start.shape) * noise
         )
 
-    def p_losses(self, x_start, t, cond, noise=None):
+    def p_losses(self, x_start, t, cond, noise=None, valid_mask=None):
         if noise is None:
             noise = torch.randn_like(x_start)
 
         x_noisy = self.q_sample(x_start=x_start, t=t, noise=noise)
-        x_recon = self.denoise_fn(x_noisy, t, cond)
+        x_recon = self._run_denoise(x_noisy, t, cond, valid_mask=valid_mask)
 
         return x_recon, noise
 
-    def inference(self, cond, b=1, x_start=None, device=None):
+    def inference(self, cond, b=1, x_start=None, device=None, valid_mask=None):
         depth = hparams.get('K_step_infer', self.k_step)
         speedup = hparams['diff_speedup']
         if speedup > 0:
@@ -262,8 +272,11 @@ class GaussianDiffusion(nn.Module):
 
                     return wrapped
 
+                def denoise_with_mask(x, t, cond):
+                    return self._run_denoise(x, t, cond, valid_mask=valid_mask)
+
                 model_fn = model_wrapper(
-                    my_wrapper(self.denoise_fn),
+                    my_wrapper(denoise_with_mask),
                     noise_schedule,
                     model_type="noise",  # or "x_start" or "v" or "score"
                     model_kwargs={"cond": cond}
@@ -301,8 +314,11 @@ class GaussianDiffusion(nn.Module):
 
                     return wrapped
 
+                def denoise_with_mask(x, t, cond):
+                    return self._run_denoise(x, t, cond, valid_mask=valid_mask)
+
                 model_fn = model_wrapper(
-                    my_wrapper(self.denoise_fn),
+                    my_wrapper(denoise_with_mask),
                     noise_schedule,
                     model_type="noise",  # or "x_start" or "v" or "score"
                     model_kwargs={"cond": cond}
@@ -332,7 +348,7 @@ class GaussianDiffusion(nn.Module):
                 ):
                     x = self.p_sample_plms(
                         x, torch.full((b,), i, device=device, dtype=torch.long),
-                        iteration_interval, cond=cond
+                        iteration_interval, cond=cond, valid_mask=valid_mask
                     )
             elif algorithm == 'ddim':
                 iteration_interval = speedup
@@ -342,18 +358,21 @@ class GaussianDiffusion(nn.Module):
                 ):
                     x = self.p_sample_ddim(
                         x, torch.full((b,), i, device=device, dtype=torch.long),
-                        iteration_interval, cond=cond
+                        iteration_interval, cond=cond, valid_mask=valid_mask
                     )
             else:
                 raise ValueError(f"Unsupported acceleration algorithm for DDPM: {algorithm}.")
         else:
             for i in tqdm(reversed(range(0, t_max)), desc='sample time step', total=t_max,
                           disable=not hparams['infer'], leave=False):
-                x = self.p_sample(x, torch.full((b,), i, device=device, dtype=torch.long), cond)
+                x = self.p_sample(
+                    x, torch.full((b,), i, device=device, dtype=torch.long), cond,
+                    valid_mask=valid_mask
+                )
         x = x.transpose(2, 3).squeeze(1)  # [B, F, M, T] => [B, T, M] or [B, F, T, M]
         return x
 
-    def forward(self, condition, gt_spec=None, src_spec=None, infer=True):
+    def forward(self, condition, gt_spec=None, src_spec=None, infer=True, valid_mask=None):
         """
             conditioning diffusion, use fastspeech2 encoder output as the condition
         """
@@ -366,7 +385,7 @@ class GaussianDiffusion(nn.Module):
             if self.num_feats == 1:
                 spec = spec[:, None, :, :]  # [B, F=1, M, T]
             t = torch.randint(0, self.k_step, (b,), device=device).long()
-            x_recon, noise = self.p_losses(spec, t, cond=cond)
+            x_recon, noise = self.p_losses(spec, t, cond=cond, valid_mask=valid_mask)
             return x_recon, noise
         else:
             # src_spec: [B, T, M] or [B, F, T, M]
@@ -376,7 +395,9 @@ class GaussianDiffusion(nn.Module):
                     spec = spec[:, None, :, :]
             else:
                 spec = None
-            x = self.inference(cond, b=b, x_start=spec, device=device)
+            x = self.inference(
+                cond, b=b, x_start=spec, device=device, valid_mask=valid_mask
+            )
             return self.denorm_spec(x)
 
     def norm_spec(self, x):

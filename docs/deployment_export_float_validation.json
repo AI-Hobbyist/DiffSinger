@@ -1,0 +1,74 @@
+[
+  {
+    "backbone": "dit",
+    "objective": "ddpm",
+    "precision": "fp32",
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "acoustic",
+    "stages": 2
+  },
+  {
+    "backbone": "dit",
+    "objective": "ddpm",
+    "precision": "fp32",
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "variance",
+    "stages": 8
+  },
+  {
+    "backbone": "dit",
+    "objective": "ddpm",
+    "precision": "fp16",
+    "onnx_execution": false,
+    "ort_optimization": "disabled",
+    "component": "acoustic",
+    "stages": 2
+  },
+  {
+    "backbone": "dit",
+    "objective": "ddpm",
+    "precision": "fp16",
+    "onnx_execution": false,
+    "ort_optimization": "disabled",
+    "component": "variance",
+    "stages": 8
+  },
+  {
+    "backbone": "dit",
+    "objective": "reflow",
+    "precision": "fp32",
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "acoustic",
+    "stages": 2
+  },
+  {
+    "backbone": "dit",
+    "objective": "reflow",
+    "precision": "fp32",
+    "onnx_execution": true,
+    "ort_optimization": "disabled",
+    "component": "variance",
+    "stages": 8
+  },
+  {
+    "backbone": "dit",
+    "objective": "reflow",
+    "precision": "fp16",
+    "onnx_execution": false,
+    "ort_optimization": "not_run",
+    "component": "acoustic",
+    "stages": 2
+  },
+  {
+    "backbone": "dit",
+    "objective": "reflow",
+    "precision": "fp16",
+    "onnx_execution": false,
+    "ort_optimization": "not_run",
+    "component": "variance",
+    "stages": 8
+  }
+]

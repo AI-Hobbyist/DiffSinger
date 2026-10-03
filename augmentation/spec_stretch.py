@@ -20,7 +20,8 @@ class SpectrogramStretchAugmentation(BaseAugmentation):
 
     def __init__(self, data_dirs: list, augmentation_args: dict, pe: BasePE = None):
         super().__init__(data_dirs, augmentation_args)
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        from utils.preprocessing_resources import preprocessing_device
+        self.device = preprocessing_device(hparams.get('binarization_args', {}))
         self.lr = LengthRegulator().to(self.device)
         self.pe = pe
 

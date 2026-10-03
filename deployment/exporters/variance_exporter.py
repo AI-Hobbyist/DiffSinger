@@ -3,11 +3,11 @@ from pathlib import Path
 from typing import Union, List, Tuple, Dict
 
 import onnx
-import onnxsim
 import torch
 import yaml
 
 from basics.base_exporter import BaseExporter
+from deployment.modules.dit import compile_backbone_for_onnx
 from deployment.modules.toplevel import DiffSingerVarianceONNX
 from modules.fastspeech.param_adaptor import VARIANCE_CHECKLIST
 from utils import load_ckpt, onnx_helper, remove_suffix
@@ -24,9 +24,11 @@ class DiffSingerVarianceExporter(BaseExporter):
             freeze_glide: bool = False,
             freeze_expr: bool = False,
             export_spk: List[Tuple[str, Dict[str, float]]] = None,
-            freeze_spk: Tuple[str, Dict[str, float]] = None
+            freeze_spk: Tuple[str, Dict[str, float]] = None,
+            checkpoint_path: Path = None
     ):
         super().__init__(device=device, cache_dir=cache_dir)
+        self.checkpoint_path = checkpoint_path
         # Basic attributes
         self.model_name: str = hparams['exp_name']
         self.ckpt_steps: int = ckpt_steps
@@ -89,9 +91,10 @@ class DiffSingerVarianceExporter(BaseExporter):
                 self.phoneme_dictionary.encode_one(p)
                 for p in self.phoneme_dictionary.cross_lingual_phonemes
             })
-        ).eval().to(self.device)
-        load_ckpt(model, hparams['work_dir'], ckpt_steps=self.ckpt_steps,
+        ).eval()
+        load_ckpt(model, self.checkpoint_path or hparams['work_dir'], ckpt_steps=self.ckpt_steps,
                   prefix_in_ckpt='model', strict=True, device=self.device)
+        model.to(self.device)
         model.build_smooth_op(self.device)
         return model
 
@@ -211,7 +214,7 @@ class DiffSingerVarianceExporter(BaseExporter):
 
         print(f'Exporting {self.fs2_class_name}...')
         if self.model.predict_dur:
-            torch.onnx.export(
+            self.export_tensor_graph(
                 self.model.view_as_linguistic_encoder(),
                 (
                     tokens,
@@ -245,7 +248,7 @@ class DiffSingerVarianceExporter(BaseExporter):
             )
 
             print(f'Exporting {self.dur_predictor_class_name}...')
-            torch.onnx.export(
+            self.export_tensor_graph(
                 self.model.view_as_dur_predictor(),
                 (
                     encoder_out,
@@ -280,7 +283,7 @@ class DiffSingerVarianceExporter(BaseExporter):
                 **onnx_helper.TORCHSCRIPT_EXPORT_KWARGS
             )
         else:
-            torch.onnx.export(
+            self.export_tensor_graph(
                 self.model.view_as_linguistic_encoder(),
                 (
                     tokens,
@@ -336,7 +339,7 @@ class DiffSingerVarianceExporter(BaseExporter):
                     )} if input_spk_embed else {})
                 }
             )
-            torch.onnx.export(
+            self.export_tensor_graph(
                 self.model.view_as_pitch_preprocess(),
                 pitch_input_args,
                 self.pitch_preprocess_cache_path,
@@ -395,7 +398,7 @@ class DiffSingerVarianceExporter(BaseExporter):
             print(f'Tracing {self.pitch_backbone_class_name} backbone...')
             pitch_predictor = self.model.view_as_pitch_predictor()
             pitch_predictor.pitch_predictor.set_backbone(
-                torch.jit.trace(
+                compile_backbone_for_onnx(
                     pitch_predictor.pitch_predictor.backbone,
                     (
                         noise,
@@ -421,7 +424,7 @@ class DiffSingerVarianceExporter(BaseExporter):
             )
 
             print(f'Exporting {self.pitch_predictor_class_name}...')
-            torch.onnx.export(
+            self.export_tensor_graph(
                 pitch_predictor,
                 (
                     condition.transpose(1, 2),
@@ -448,7 +451,7 @@ class DiffSingerVarianceExporter(BaseExporter):
             )
 
             # Prepare inputs for postprocessor of the multi-variance predictor
-            torch.onnx.export(
+            self.export_tensor_graph(
                 self.model.view_as_pitch_postprocess(),
                 (
                     pitch,
@@ -488,7 +491,7 @@ class DiffSingerVarianceExporter(BaseExporter):
                 for v_name in self.model.variance_prediction_list
             }
             retake = torch.ones_like(pitch, dtype=torch.bool)[..., None].tile(len(self.model.variance_prediction_list))
-            torch.onnx.export(
+            self.export_tensor_graph(
                 self.model.view_as_variance_preprocess(),
                 (
                     encoder_out,
@@ -545,7 +548,7 @@ class DiffSingerVarianceExporter(BaseExporter):
             print(f'Tracing {self.variance_backbone_class_name} backbone...')
             multi_var_predictor = self.model.view_as_variance_predictor()
             multi_var_predictor.variance_predictor.set_backbone(
-                torch.jit.trace(
+                compile_backbone_for_onnx(
                     multi_var_predictor.variance_predictor.backbone,
                     (
                         noise,
@@ -571,7 +574,7 @@ class DiffSingerVarianceExporter(BaseExporter):
             )
 
             print(f'Exporting {self.multi_var_predictor_class_name}...')
-            torch.onnx.export(
+            self.export_tensor_graph(
                 multi_var_predictor,
                 (
                     condition.transpose(1, 2),
@@ -602,7 +605,7 @@ class DiffSingerVarianceExporter(BaseExporter):
                 if len(self.model.variance_prediction_list) == 1 \
                 else (1, len(self.model.variance_prediction_list), 15)
             xs_pred = torch.randn(xs_shape, dtype=torch.float32, device=self.device)
-            torch.onnx.export(
+            self.export_tensor_graph(
                 self.model.view_as_variance_postprocess(),
                 (
                     xs_pred
@@ -659,7 +662,7 @@ class DiffSingerVarianceExporter(BaseExporter):
             }
         )
         print(f'Running ONNX Simplifier on {self.fs2_class_name}...')
-        linguistic, check = onnxsim.simplify(linguistic, include_subgraph=True)
+        linguistic, check = self.simplify_graph(linguistic, include_subgraph=True)
         assert check, 'Simplified ONNX model could not be validated'
         onnx_helper.model_reorder_io_list(
             linguistic, 'input',
@@ -676,7 +679,7 @@ class DiffSingerVarianceExporter(BaseExporter):
             }
         )
         print(f'Running ONNX Simplifier on {self.dur_predictor_class_name}...')
-        dur_predictor, check = onnxsim.simplify(dur_predictor, include_subgraph=True)
+        dur_predictor, check = self.simplify_graph(dur_predictor, include_subgraph=True)
         assert check, 'Simplified ONNX model could not be validated'
         print(f'| optimize graph: {self.dur_predictor_class_name}')
         return dur_predictor
@@ -687,14 +690,14 @@ class DiffSingerVarianceExporter(BaseExporter):
         onnx_helper.model_override_io_shapes(
             pitch_pre, output_shapes={'pitch_cond': (1, 'n_frames', hparams['hidden_size'])}
         )
-        pitch_pre, check = onnxsim.simplify(pitch_pre, include_subgraph=True)
+        pitch_pre, check = self.simplify_graph(pitch_pre, include_subgraph=True)
         assert check, 'Simplified ONNX model could not be validated'
 
         onnx_helper.model_override_io_shapes(
             pitch_predictor, output_shapes={'x_pred': (1, 'n_frames')}
         )
         print(f'Running ONNX Simplifier #1 on {self.pitch_predictor_class_name}...')
-        pitch_predictor, check = onnxsim.simplify(pitch_predictor, include_subgraph=True)
+        pitch_predictor, check = self.simplify_graph(pitch_predictor, include_subgraph=True)
         assert check, 'Simplified ONNX model could not be validated'
         onnx_helper.graph_fold_back_to_squeeze(pitch_predictor.graph)
         onnx_helper.graph_extract_conditioner_projections(
@@ -704,7 +707,7 @@ class DiffSingerVarianceExporter(BaseExporter):
         )
         onnx_helper.graph_remove_unused_values(pitch_predictor.graph)
         print(f'Running ONNX Simplifier #2 on {self.pitch_predictor_class_name}...')
-        pitch_predictor, check = onnxsim.simplify(pitch_predictor, include_subgraph=True)
+        pitch_predictor, check = self.simplify_graph(pitch_predictor, include_subgraph=True)
         assert check, 'Simplified ONNX model could not be validated'
 
         onnx_helper.model_add_prefixes(pitch_pre, node_prefix='/pre', ignored_pattern=r'.*embed.*')
@@ -736,7 +739,7 @@ class DiffSingerVarianceExporter(BaseExporter):
         onnx_helper.model_override_io_shapes(
             var_pre, output_shapes={'variance_cond': (1, 'n_frames', hparams['hidden_size'])}
         )
-        var_pre, check = onnxsim.simplify(var_pre, include_subgraph=True)
+        var_pre, check = self.simplify_graph(var_pre, include_subgraph=True)
         assert check, 'Simplified ONNX model could not be validated'
 
         onnx_helper.model_override_io_shapes(
@@ -747,7 +750,7 @@ class DiffSingerVarianceExporter(BaseExporter):
             }
         )
         print(f'Running ONNX Simplifier #1 on {self.multi_var_predictor_class_name}...')
-        var_diffusion, check = onnxsim.simplify(var_diffusion, include_subgraph=True)
+        var_diffusion, check = self.simplify_graph(var_diffusion, include_subgraph=True)
         assert check, 'Simplified ONNX model could not be validated'
         onnx_helper.graph_fold_back_to_squeeze(var_diffusion.graph)
         onnx_helper.graph_extract_conditioner_projections(
@@ -757,10 +760,10 @@ class DiffSingerVarianceExporter(BaseExporter):
         )
         onnx_helper.graph_remove_unused_values(var_diffusion.graph)
         print(f'Running ONNX Simplifier #2 on {self.multi_var_predictor_class_name}...')
-        var_diffusion, check = onnxsim.simplify(var_diffusion, include_subgraph=True)
+        var_diffusion, check = self.simplify_graph(var_diffusion, include_subgraph=True)
         assert check, 'Simplified ONNX model could not be validated'
 
-        var_post, check = onnxsim.simplify(var_post, include_subgraph=True)
+        var_post, check = self.simplify_graph(var_post, include_subgraph=True)
         assert check, 'Simplified ONNX model could not be validated'
 
         ignored_variance_names = '|'.join([f'({v_name})' for v_name in self.model.variance_prediction_list])
@@ -795,7 +798,7 @@ class DiffSingerVarianceExporter(BaseExporter):
     # noinspection PyMethodMayBeStatic
     def _export_spk_embed(self, path: Path, spk_embed: torch.Tensor):
         with open(path, 'wb') as f:
-            f.write(spk_embed.cpu().numpy().tobytes())
+            f.write(spk_embed.float().cpu().numpy().tobytes())
         print(f'| export spk embed => {path}')
 
     def _export_phonemes(self, path: Path):

@@ -63,8 +63,9 @@ tension_smooth: SinusoidalSmoothingConv1d = None
 
 
 class VarianceBinarizer(BaseBinarizer):
-    def __init__(self):
-        super().__init__(data_attrs=VARIANCE_ITEM_ATTRIBUTES)
+    def __init__(self, datasets=None, binary_data_dir=None):
+        super().__init__(datasets=datasets, data_attrs=VARIANCE_ITEM_ATTRIBUTES,
+                         binary_data_dir=binary_data_dir)
 
         self.use_glide_embed = hparams['use_glide_embed']
         glide_types = hparams['glide_types']
@@ -310,7 +311,7 @@ class VarianceBinarizer(BaseBinarizer):
 
         global pitch_extractor
         if pitch_extractor is None:
-            pitch_extractor = initialize_pe()
+            pitch_extractor = initialize_pe(self.device)
         f0 = uv = None
         if self.prefer_ds:
             f0_seq = self.load_attr_from_ds(ds_id, name, 'f0_seq', idx=ds_seg_idx)
@@ -441,7 +442,7 @@ class VarianceBinarizer(BaseBinarizer):
         dec_waveform = DecomposedWaveform(
             waveform, samplerate=hparams['audio_sample_rate'], f0=f0 * ~uv,
             hop_size=hparams['hop_size'], fft_size=hparams['fft_size'], win_size=hparams['win_size'],
-            algorithm=hparams['hnsep']
+            algorithm=hparams['hnsep'], device=self.device
         ) if waveform is not None else None
 
         # Below: extract breathiness

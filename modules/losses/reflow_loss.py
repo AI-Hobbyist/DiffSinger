@@ -39,7 +39,7 @@ class RectifiedFlowLoss(nn.Module):
         else:
             return self.loss(v_pred, v_gt)
 
-    def forward(self, v_pred: Tensor, v_gt: Tensor, t: Tensor, non_padding: Tensor = None) -> Tensor:
+    def forward(self, v_pred: Tensor, v_gt: Tensor, t: Tensor, non_padding: Tensor = None, feature_mask: Tensor = None) -> Tensor:
         """
         :param v_pred: [B, 1, M, T]
         :param v_gt: [B, 1, M, T]
@@ -47,4 +47,13 @@ class RectifiedFlowLoss(nn.Module):
         :param non_padding: [B, T, M]
         """
         v_pred, v_gt = self._mask_non_padding(v_pred, v_gt, non_padding)
-        return self._forward(v_pred, v_gt, t=t).mean()
+        loss = self._forward(v_pred, v_gt, t=t)
+        if feature_mask is None:
+            return loss.mean()
+        # [B,F] selects curve generators' feature axis, never mel bins or frames.
+        mask = feature_mask.to(device=loss.device, dtype=loss.dtype)
+        if mask.ndim != 2 or mask.shape[1] != loss.shape[1] or mask.shape[0] not in (1, loss.shape[0]):
+            raise ValueError('feature_mask must have shape [1,F] or [B,F].')
+        mask = mask.expand(loss.shape[0], -1)
+        # Preserve the legacy mean over padded frames, averaging only selected curves.
+        return (loss * mask[:, :, None, None]).sum() / (mask.sum().clamp_min(1) * loss.shape[2] * loss.shape[3])

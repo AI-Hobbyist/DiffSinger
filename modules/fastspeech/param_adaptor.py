@@ -77,6 +77,7 @@ class ParameterAdaptorModule(torch.nn.Module):
                 'clamps': clamps,
                 'repeat_bins': repeat_bins,
                 'timesteps': hparams.get('timesteps'),
+                'k_step': hparams.get('timesteps'),
                 'time_scale_factor': hparams.get('time_scale_factor'),
                 'backbone_type': backbone_type,
                 'backbone_args': backbone_args

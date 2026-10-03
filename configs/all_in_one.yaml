@@ -1,0 +1,12 @@
+# Generic joint mode: acoustic/pitch/curve backbone choices stay independent.
+base_config:
+  - configs/acoustic.yaml
+  - configs/variance.yaml
+task_cls: training.all_in_one_task.AllInOneTask
+binarizer_cls: preprocessing.all_in_one_binarizer.AllInOneBinarizer
+all_in_one:
+  enabled: true
+val_with_variance:
+  enable: false
+aux_datasets:
+  enable: false

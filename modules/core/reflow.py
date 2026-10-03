@@ -6,20 +6,21 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 
-from modules.backbones import build_backbone
+from modules.backbones import build_backbone, run_backbone
 from utils.hparams import hparams
 
 
 class RectifiedFlow(nn.Module):
     def __init__(self, out_dims, num_feats=1, t_start=0., time_scale_factor=1000,
                  backbone_type=None, backbone_args=None,
-                 spec_min=None, spec_max=None):
+                 spec_min=None, spec_max=None, use_shallow_diffusion=None):
         super().__init__()
         self.velocity_fn: nn.Module = build_backbone(out_dims, num_feats, backbone_type, backbone_args)
         self.out_dims = out_dims
         self.num_feats = num_feats
         self.use_dual_timestep = hparams.get('use_dual_timestep', False)
-        self.use_shallow_diffusion = hparams.get('use_shallow_diffusion', False)
+        self.use_shallow_diffusion = (hparams.get('use_shallow_diffusion', False)
+                                      if use_shallow_diffusion is None else use_shallow_diffusion)
         if self.use_shallow_diffusion:
             assert 0. <= t_start <= 1., 'T_start should be in [0, 1].'
         else:
@@ -34,17 +35,25 @@ class RectifiedFlow(nn.Module):
         self.register_buffer('spec_min', spec_min, persistent=False)
         self.register_buffer('spec_max', spec_max, persistent=False)
 
-    def p_losses(self, x_end, t1, cond, t2=None, mask=None):
+    def _run_velocity(self, x, t, cond, valid_mask=None):
+        return run_backbone(self.velocity_fn, x, t, cond, valid_mask=valid_mask)
+
+    def p_losses(self, x_end, t1, cond, t2=None, mask=None, valid_mask=None):
         t = t1 if mask is None else t1 + (t2 - t1) * mask
         x_start = torch.randn_like(x_end)
         x_t = x_start + t[:, None, None,:] * (x_end - x_start)
         s1 = t1 * self.time_scale_factor
         s2 = None if t2 is None else t2 * self.time_scale_factor
-        v_pred = self.velocity_fn(x_t, s1, cond, s2, mask)
+        if getattr(self.velocity_fn, "supports_valid_mask", False):
+            v_pred = self.velocity_fn(
+                x_t, s1, cond, diffusion_step_2=s2, mask=mask, valid_mask=valid_mask
+            )
+        else:
+            v_pred = self.velocity_fn(x_t, s1, cond, s2, mask)
 
         return v_pred, x_end - x_start, t
 
-    def forward(self, condition, gt_spec=None, src_spec=None, infer=True):
+    def forward(self, condition, gt_spec=None, src_spec=None, infer=True, valid_mask=None):
         cond = condition.transpose(1, 2)
         b, _, n_frames = cond.shape
         device = condition.device
@@ -61,7 +70,7 @@ class RectifiedFlow(nn.Module):
             else:
                 t2 = None
                 mask = None
-            v_pred, v_gt, t = self.p_losses(spec, t1, cond=cond, t2=t2, mask=mask)
+            v_pred, v_gt, t = self.p_losses(spec, t1, cond=cond, t2=t2, mask=mask, valid_mask=valid_mask)
             return v_pred, v_gt, t
         else:
             # src_spec: [B, T, M] or [B, F, T, M]
@@ -71,49 +80,78 @@ class RectifiedFlow(nn.Module):
                     spec = spec[:, None, :, :]
             else:
                 spec = None
-            x = self.inference(cond, b=b, x_end=spec, device=device)
+            x = self.inference(cond, b=b, x_end=spec, device=device, valid_mask=valid_mask)
             return self.denorm_spec(x)
 
     @torch.no_grad()
-    def sample_euler(self, x, t, dt, cond):
-        x += self.velocity_fn(x, self.time_scale_factor * t, cond) * dt
+    def sample_euler(self, x, t, dt, cond, valid_mask=None):
+        x += self._run_velocity(
+            x, self.time_scale_factor * t, cond, valid_mask=valid_mask
+        ) * dt
         t += dt
         return x, t
 
     @torch.no_grad()
-    def sample_rk2(self, x, t, dt, cond):
-        k_1 = self.velocity_fn(x, self.time_scale_factor * t, cond)
-        k_2 = self.velocity_fn(x + 0.5 * k_1 * dt, self.time_scale_factor * (t + 0.5 * dt), cond)
+    def sample_rk2(self, x, t, dt, cond, valid_mask=None):
+        k_1 = self._run_velocity(x, self.time_scale_factor * t, cond, valid_mask=valid_mask)
+        k_2 = self._run_velocity(
+            x + 0.5 * k_1 * dt,
+            self.time_scale_factor * (t + 0.5 * dt),
+            cond,
+            valid_mask=valid_mask
+        )
         x += k_2 * dt
         t += dt
         return x, t
 
     @torch.no_grad()
-    def sample_rk4(self, x, t, dt, cond):
-        k_1 = self.velocity_fn(x, self.time_scale_factor * t, cond)
-        k_2 = self.velocity_fn(x + 0.5 * k_1 * dt, self.time_scale_factor * (t + 0.5 * dt), cond)
-        k_3 = self.velocity_fn(x + 0.5 * k_2 * dt, self.time_scale_factor * (t + 0.5 * dt), cond)
-        k_4 = self.velocity_fn(x + k_3 * dt, self.time_scale_factor * (t + dt), cond)
+    def sample_rk4(self, x, t, dt, cond, valid_mask=None):
+        k_1 = self._run_velocity(x, self.time_scale_factor * t, cond, valid_mask=valid_mask)
+        k_2 = self._run_velocity(
+            x + 0.5 * k_1 * dt, self.time_scale_factor * (t + 0.5 * dt), cond,
+            valid_mask=valid_mask
+        )
+        k_3 = self._run_velocity(
+            x + 0.5 * k_2 * dt, self.time_scale_factor * (t + 0.5 * dt), cond,
+            valid_mask=valid_mask
+        )
+        k_4 = self._run_velocity(
+            x + k_3 * dt, self.time_scale_factor * (t + dt), cond,
+            valid_mask=valid_mask
+        )
         x += (k_1 + 2 * k_2 + 2 * k_3 + k_4) * dt / 6
         t += dt
         return x, t
 
     @torch.no_grad()
-    def sample_rk5(self, x, t, dt, cond):
-        k_1 = self.velocity_fn(x, self.time_scale_factor * t, cond)
-        k_2 = self.velocity_fn(x + 0.25 * k_1 * dt, self.time_scale_factor * (t + 0.25 * dt), cond)
-        k_3 = self.velocity_fn(x + 0.125 * (k_2 + k_1) * dt, self.time_scale_factor * (t + 0.25 * dt), cond)
-        k_4 = self.velocity_fn(x + 0.5 * (-k_2 + 2 * k_3) * dt, self.time_scale_factor * (t + 0.5 * dt), cond)
-        k_5 = self.velocity_fn(x + 0.0625 * (3 * k_1 + 9 * k_4) * dt, self.time_scale_factor * (t + 0.75 * dt), cond)
-        k_6 = self.velocity_fn(x + (-3 * k_1 + 2 * k_2 + 12 * k_3 - 12 * k_4 + 8 * k_5) * dt / 7,
-                               self.time_scale_factor * (t + dt),
-                               cond)
+    def sample_rk5(self, x, t, dt, cond, valid_mask=None):
+        k_1 = self._run_velocity(x, self.time_scale_factor * t, cond, valid_mask=valid_mask)
+        k_2 = self._run_velocity(
+            x + 0.25 * k_1 * dt, self.time_scale_factor * (t + 0.25 * dt), cond,
+            valid_mask=valid_mask
+        )
+        k_3 = self._run_velocity(
+            x + 0.125 * (k_2 + k_1) * dt,
+            self.time_scale_factor * (t + 0.25 * dt), cond, valid_mask=valid_mask
+        )
+        k_4 = self._run_velocity(
+            x + 0.5 * (-k_2 + 2 * k_3) * dt,
+            self.time_scale_factor * (t + 0.5 * dt), cond, valid_mask=valid_mask
+        )
+        k_5 = self._run_velocity(
+            x + 0.0625 * (3 * k_1 + 9 * k_4) * dt,
+            self.time_scale_factor * (t + 0.75 * dt), cond, valid_mask=valid_mask
+        )
+        k_6 = self._run_velocity(
+            x + (-3 * k_1 + 2 * k_2 + 12 * k_3 - 12 * k_4 + 8 * k_5) * dt / 7,
+            self.time_scale_factor * (t + dt), cond, valid_mask=valid_mask
+        )
         x += (7 * k_1 + 32 * k_3 + 12 * k_4 + 32 * k_5 + 7 * k_6) * dt / 90
         t += dt
         return x, t
 
     @torch.no_grad()
-    def inference(self, cond, b=1, x_end=None, device=None):
+    def inference(self, cond, b=1, x_end=None, device=None, valid_mask=None):
         noise = torch.randn(b, self.num_feats, self.out_dims, cond.shape[2], device=device)
         t_start = hparams.get('T_start_infer', self.t_start)
         if self.use_shallow_diffusion and t_start > 0:
@@ -143,7 +181,9 @@ class RectifiedFlow(nn.Module):
             dts = torch.tensor([dt]).to(x)
             for i in tqdm(range(infer_step), desc='sample time step', total=infer_step,
                           disable=not hparams['infer'], leave=False):
-                x, _ = algorithm_fn(x, t_start + i * dts, dt, cond)
+                x, _ = algorithm_fn(
+                    x, t_start + i * dts, dt, cond, valid_mask=valid_mask
+                )
             x = x.float()
         x = x.transpose(2, 3).squeeze(1)  # [B, F, M, T] => [B, T, M] or [B, F, T, M]
         return x
@@ -168,7 +208,7 @@ class RepetitiveRectifiedFlow(RectifiedFlow):
             out_dims=repeat_bins, num_feats=num_feats,
             time_scale_factor=time_scale_factor,
             backbone_type=backbone_type, backbone_args=backbone_args,
-            spec_min=spec_min, spec_max=spec_max
+            spec_min=spec_min, spec_max=spec_max, use_shallow_diffusion=False
         )
 
     def norm_spec(self, x):

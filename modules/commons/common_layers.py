@@ -385,7 +385,7 @@ class MultiheadSelfAttentionWithRoPE(nn.Module):
             K = self.rotary_embed.rotate_queries_or_keys(K)
 
         # Compute attention scores
-        scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(self.head_dim)  # (B, H, L, L)
+        scores = torch.matmul(Q, K.permute(0, 1, 3, 2)) / math.sqrt(self.head_dim)  # (B, H, L, L)
 
         # Apply key padding mask if provided
         if key_padding_mask is not None:
@@ -401,7 +401,7 @@ class MultiheadSelfAttentionWithRoPE(nn.Module):
         attn_output = torch.matmul(attn_weights, V)  # (B, H, L, D)
 
         # Reshape and concatenate heads
-        attn_output = attn_output.transpose(1, 2).contiguous().view(batch_size, seq_len, embed_dim)  # (B, L, C)
+        attn_output = attn_output.permute(0, 2, 1, 3).contiguous().view(batch_size, seq_len, embed_dim)  # (B, L, C)
 
         # Final linear projection
         output = self.out_proj(attn_output)  # (B, L, C)

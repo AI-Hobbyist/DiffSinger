@@ -1,0 +1,81 @@
+base_config:
+- configs/all_in_one.yaml
+task_cls: training.all_in_one_task.AllInOneTask
+binarizer_cls: preprocessing.all_in_one_binarizer.AllInOneBinarizer
+all_in_one:
+  enabled: true
+val_with_variance:
+  enable: false
+dictionaries:
+  zh: dictionaries/opencpop-extension.txt
+all_phonemes:
+- AP
+- SP
+extra_phonemes: []
+merged_phoneme_groups: []
+datasets:
+- raw_data_dir: data/xxx/raw
+  speaker: speaker
+  spk_id: 0
+  language: zh
+  test_prefixes:
+  - wav1
+binary_data_dir: data/xxx/binary-all-in-one
+binarization_args:
+  shuffle: true
+  num_workers: 0
+  prefer_ds: false
+  allow_missing_phonemes: false
+use_lang_id: false
+num_lang: 1
+use_spk_id: false
+num_spk: 1
+use_energy_embed: true
+use_breathiness_embed: true
+use_voicing_embed: true
+use_tension_embed: true
+use_key_shift_embed: true
+use_speed_embed: true
+predict_dur: true
+predict_pitch: true
+predict_energy: true
+predict_breathiness: true
+predict_voicing: true
+predict_tension: true
+backbone_type: wavenet
+backbone_args:
+  num_channels: 512
+  num_layers: 20
+  dilation_cycle_length: 4
+pitch_prediction_args:
+  backbone_type: wavenet
+  backbone_args:
+    num_layers: 20
+    num_channels: 256
+    dilation_cycle_length: 5
+variances_prediction_args:
+  backbone_type: wavenet
+  backbone_args:
+    num_layers: 10
+    num_channels: 192
+    dilation_cycle_length: 4
+val_with_vocoder: false
+max_batch_frames: 1536
+max_batch_size: 2
+max_val_batch_frames: 768
+max_val_batch_size: 1
+max_sample_frames: 768
+accumulate_grad_batches: 8
+clip_grad_norm: 1.0
+optimizer_args:
+  optimizer_cls: torch.optim.AdamW
+  lr: 0.0003
+  weight_decay: 0.0
+lr_scheduler_args:
+  scheduler_cls: torch.optim.lr_scheduler.StepLR
+  step_size: 50000
+  gamma: 0.5
+use_dual_timestep: false
+use_fused_kernels: false
+ds_workers: 0
+vocoder_ckpt: checkpoints/pc_nsf_hifigan_44.1k_hop512_128bin_2025.02/model.ckpt

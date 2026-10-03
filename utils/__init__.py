@@ -192,9 +192,15 @@ def load_ckpt(
         )
     assert len(checkpoint_path) > 0, f'| ckpt not found in {ckpt_base_dir}.'
     checkpoint_path = checkpoint_path[-1]
-    ckpt_loaded = torch.load(checkpoint_path, map_location=device)
+    # Keep optimizer tensors and other training state off the GPU while loading.
+    ckpt_loaded = torch.load(checkpoint_path, map_location='cpu')
     if isinstance(cur_model, CategorizedModule):
-        cur_model.check_category(ckpt_loaded.get('category'))
+        if ckpt_loaded.get('category') == 'all_in_one' and cur_model.category in ('acoustic', 'variance'):
+            if prefix_in_ckpt != 'model':
+                raise ValueError('All-in-one component loading requires prefix_in_ckpt=model.')
+            prefix_in_ckpt = f'model.{cur_model.category}'
+        else:
+            cur_model.check_category(ckpt_loaded.get('category'))
     if key_in_ckpt is None:
         state_dict = ckpt_loaded
     else:
@@ -225,6 +231,15 @@ def load_ckpt(
             k = k[:-len('in_proj_weight')] + 'in_proj.weight'
         renamed[k] = v
     state_dict = renamed
+
+    optimized = ckpt_loaded.get('inference_optimization')
+    if optimized is not None:
+        if not strict:
+            raise ValueError('Optimized inference checkpoints require strict loading.')
+        from utils.checkpoint_optimization import load_optimized_state
+        load_optimized_state(cur_model, state_dict, optimized)
+        print(f"| load optimized {optimized['precision']} checkpoint from '{checkpoint_path}'.")
+        return checkpoint_path
 
     if not strict:
         cur_model_state_dict = cur_model.state_dict()

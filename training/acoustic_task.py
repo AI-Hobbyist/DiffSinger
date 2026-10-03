@@ -22,8 +22,8 @@ matplotlib.use('Agg')
 
 
 class AcousticDataset(BaseDataset):
-    def __init__(self, prefix, preload=False):
-        super(AcousticDataset, self).__init__(prefix, hparams['dataset_size_key'], preload)
+    def __init__(self, prefix, preload=False, data_dir=None):
+        super(AcousticDataset, self).__init__(prefix, hparams['dataset_size_key'], preload, data_dir=data_dir)
         self.required_variances = {}  # key: variance name, value: padding value
         if hparams['use_energy_embed']:
             self.required_variances['energy'] = 0.0
@@ -105,7 +105,7 @@ class AcousticTask(BaseTask):
                 from lightning.pytorch.utilities.rank_zero import rank_zero_info
                 # NOTE: LYNXNet2 defaults to swiglu when glu_type is unset
                 self._fused_kernels_patched = patch_diffusion_module(
-                    self.model.diffusion,
+                    getattr(self.model, 'acoustic', self.model).diffusion,
                     glu_type=hparams['backbone_args'].get('glu_type', 'swiglu'),
                 )
                 rank_zero_info('Fused kernels: patched %d LYNXNet2 blocks', self._fused_kernels_patched)
@@ -120,7 +120,7 @@ class AcousticTask(BaseTask):
             from modules.kernels.integration import warmup_fused_backbones
             backbones = [
                 backbone for attr in ('denoise_fn', 'velocity_fn')
-                if (backbone := getattr(self.model.diffusion, attr, None)) is not None
+                if (backbone := getattr(getattr(self.model, 'acoustic', self.model).diffusion, attr, None)) is not None
             ]
             warmup_fused_backbones(
                 backbones,
@@ -150,7 +150,8 @@ class AcousticTask(BaseTask):
             raise ValueError(f"Unknown diffusion type: {self.diffusion_type}")
         self.register_validation_loss('mel_loss')
 
-    def run_model(self, sample, infer=False):
+    def run_model(self, sample, infer=False, model=None):
+        model = self.model if model is None else model
         txt_tokens = sample['tokens']  # [B, T_ph]
         target = sample['mel']  # [B, T_s, M]
         mel2ph = sample['mel2ph']  # [B, T_s]
@@ -170,7 +171,7 @@ class AcousticTask(BaseTask):
             languages = sample['languages']
         else:
             languages = None
-        output: ShallowDiffusionOutput = self.model(
+        output: ShallowDiffusionOutput = model(
             txt_tokens, mel2ph=mel2ph, f0=f0, **variances,
             key_shift=key_shift, speed=speed,
             spk_embed_id=spk_embed_id, languages=languages,
@@ -184,7 +185,7 @@ class AcousticTask(BaseTask):
 
             if output.aux_out is not None:
                 aux_out = output.aux_out
-                norm_gt = self.model.aux_decoder.norm_spec(target)
+                norm_gt = model.aux_decoder.norm_spec(target)
                 aux_mel_loss = self.lambda_aux_mel_loss * self.aux_mel_loss(aux_out, norm_gt)
                 losses['aux_mel_loss'] = aux_mel_loss
 
@@ -210,10 +211,10 @@ class AcousticTask(BaseTask):
         if self.use_vocoder and self.vocoder.get_device() != self.device:
             self.vocoder.to_device(self.device)
 
-    def _validation_step(self, sample, batch_idx):
-        losses = self.run_model(sample, infer=False)
+    def _validation_step(self, sample, batch_idx, model=None):
+        losses = AcousticTask.run_model(self, sample, infer=False, model=model)
         if sample['size'] > 0 and min(sample['indices']) < hparams['num_valid_plots']:
-            mel_out: ShallowDiffusionOutput = self.run_model(sample, infer=True)
+            mel_out: ShallowDiffusionOutput = AcousticTask.run_model(self, sample, infer=True, model=model)
             for i in range(len(sample['indices'])):
                 data_idx = sample['indices'][i].item()
                 if data_idx < hparams['num_valid_plots']:

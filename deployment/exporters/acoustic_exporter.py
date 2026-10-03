@@ -3,11 +3,11 @@ from pathlib import Path
 from typing import Union, List, Tuple, Dict
 
 import onnx
-import onnxsim
 import torch
 import yaml
 
 from basics.base_exporter import BaseExporter
+from deployment.modules.dit import compile_backbone_for_onnx
 from deployment.modules.toplevel import DiffSingerAcousticONNX
 from modules.fastspeech.param_adaptor import VARIANCE_CHECKLIST
 from utils import load_ckpt, onnx_helper, remove_suffix
@@ -24,9 +24,11 @@ class DiffSingerAcousticExporter(BaseExporter):
             freeze_gender: float = None,
             freeze_velocity: bool = False,
             export_spk: List[Tuple[str, Dict[str, float]]] = None,
-            freeze_spk: Tuple[str, Dict[str, float]] = None
+            freeze_spk: Tuple[str, Dict[str, float]] = None,
+            checkpoint_path: Path = None
     ):
         super().__init__(device=device, cache_dir=cache_dir)
+        self.checkpoint_path = checkpoint_path
         # Basic attributes
         self.model_name: str = hparams['exp_name']
         self.ckpt_steps: int = ckpt_steps
@@ -87,10 +89,10 @@ class DiffSingerAcousticExporter(BaseExporter):
                 self.phoneme_dictionary.encode_one(p)
                 for p in self.phoneme_dictionary.cross_lingual_phonemes
             })
-        ).eval().to(self.device)
-        load_ckpt(model, hparams['work_dir'], ckpt_steps=self.ckpt_steps,
+        ).eval()
+        load_ckpt(model, self.checkpoint_path or hparams['work_dir'], ckpt_steps=self.ckpt_steps,
                   prefix_in_ckpt='model', strict=True, device=self.device)
-        return model
+        return model.to(self.device)
 
     def export(self, path: Path):
         path.mkdir(parents=True, exist_ok=True)
@@ -236,7 +238,7 @@ class DiffSingerAcousticExporter(BaseExporter):
                 1: 'n_frames'
             }
         print(f'Exporting {self.fs2_aux_class_name}...')
-        torch.onnx.export(
+        self.export_tensor_graph(
             self.model.view_as_fs2_aux(),
             arguments,
             self.fs2_aux_cache_path,
@@ -265,7 +267,7 @@ class DiffSingerAcousticExporter(BaseExporter):
         else:
             raise ValueError(f'Invalid diffusion type: {self.model.diffusion_type}')
         major_mel_decoder.diffusion.set_backbone(
-            torch.jit.trace(
+            compile_backbone_for_onnx(
                 major_mel_decoder.diffusion.backbone,
                 (
                     noise,
@@ -296,7 +298,7 @@ class DiffSingerAcousticExporter(BaseExporter):
 
         # PyTorch ONNX export for GaussianDiffusion
         print(f'Exporting {self.diffusion_class_name}...')
-        torch.onnx.export(
+        self.export_tensor_graph(
             major_mel_decoder,
             (
                 *diffusion_inputs,
@@ -347,7 +349,7 @@ class DiffSingerAcousticExporter(BaseExporter):
 
     def _optimize_fs2_aux_graph(self, fs2: onnx.ModelProto) -> onnx.ModelProto:
         print(f'Running ONNX Simplifier on {self.fs2_aux_class_name}...')
-        fs2, check = onnxsim.simplify(fs2, include_subgraph=True)
+        fs2, check = self.simplify_graph(fs2, include_subgraph=True)
         assert check, 'Simplified ONNX model could not be validated'
         onnx_helper.model_reorder_io_list(
             fs2, 'input',
@@ -361,7 +363,7 @@ class DiffSingerAcousticExporter(BaseExporter):
             'mel': (1, 'n_frames', hparams['audio_num_mel_bins'])
         })
         print(f'Running ONNX Simplifier #1 on {self.diffusion_class_name}...')
-        diffusion, check = onnxsim.simplify(diffusion, include_subgraph=True)
+        diffusion, check = self.simplify_graph(diffusion, include_subgraph=True)
         assert check, 'Simplified ONNX model could not be validated'
         onnx_helper.graph_fold_back_to_squeeze(diffusion.graph)
         onnx_helper.graph_extract_conditioner_projections(
@@ -371,7 +373,7 @@ class DiffSingerAcousticExporter(BaseExporter):
         )
         onnx_helper.graph_remove_unused_values(diffusion.graph)
         print(f'Running ONNX Simplifier #2 on {self.diffusion_class_name}...')
-        diffusion, check = onnxsim.simplify(
+        diffusion, check = self.simplify_graph(
             diffusion,
             include_subgraph=True
         )
@@ -399,7 +401,7 @@ class DiffSingerAcousticExporter(BaseExporter):
         merged.graph.name = fs2.graph.name
 
         print(f'Running ONNX Simplifier on {self.model_class_name}...')
-        merged, check = onnxsim.simplify(
+        merged, check = self.simplify_graph(
             merged,
             include_subgraph=True
         )
@@ -411,7 +413,7 @@ class DiffSingerAcousticExporter(BaseExporter):
     # noinspection PyMethodMayBeStatic
     def _export_spk_embed(self, path: Path, spk_embed: torch.Tensor):
         with open(path, 'wb') as f:
-            f.write(spk_embed.cpu().numpy().tobytes())
+            f.write(spk_embed.float().cpu().numpy().tobytes())
         print(f'| export spk embed => {path}')
 
     def _export_phonemes(self, path: Path):

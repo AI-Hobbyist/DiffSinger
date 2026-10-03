@@ -12,7 +12,6 @@ from utils.multiprocess_utils import is_main_process as mp_is_main_process
 global_print_hparams = True
 hparams = {}
 
-
 class Args:
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
@@ -20,9 +19,26 @@ class Args:
 
 
 def override_config(old_config: dict, new_config: dict):
+    # Keep partial overrides compatible with existing experiments, but do not
+    # carry another architecture/optimizer/scheduler's arguments across a switch.
+    replacements = set()
+    if ('backbone_type' in new_config
+            and new_config['backbone_type'] != old_config.get('backbone_type', old_config.get('diff_decoder_type'))):
+        replacements.add('backbone_args')
+    for args_key, class_key in (('optimizer_args', 'optimizer_cls'),
+                               ('lr_scheduler_args', 'scheduler_cls')):
+        old_args = old_config.get(args_key)
+        new_args = new_config.get(args_key)
+        if (isinstance(old_args, dict) and isinstance(new_args, dict)
+                and class_key in new_args and new_args[class_key] != old_args.get(class_key)):
+            replacements.add(args_key)
     for k, v in new_config.items():
-        if isinstance(v, dict) and k in old_config:
-            override_config(old_config[k], new_config[k])
+        old_value = old_config.get(k)
+        if (
+                k not in replacements
+                and isinstance(v, dict) and isinstance(old_value, dict)
+        ):
+            override_config(old_value, v)
         else:
             old_config[k] = v
 
@@ -102,12 +118,35 @@ def set_hparams(config='', exp_name='', hparams_str='', print_hparams=True, glob
             if new_hparam.strip() == "":
                 continue
             k, v = new_hparam.split("=")
+            if k in ('max_updates', 'val_check_interval'):
+                # Unit strings must also work when overriding an integer default.
+                hparams_[k] = yaml.safe_load(v)
+                continue
             if k not in hparams_:
                 hparams_[k] = eval(v)
+            if isinstance(hparams_[k], (dict, list)):
+                import ast
+                parsed = ast.literal_eval(v)
+                if not isinstance(parsed, type(hparams_[k])):
+                    raise ValueError(f'{k} override must be a {type(hparams_[k]).__name__}.')
+                hparams_[k] = parsed
+                continue
             if v in ['True', 'False'] or type(hparams_[k]) == bool:
                 hparams_[k] = eval(v)
             else:
                 hparams_[k] = type(hparams_[k])(v)
+
+    if hparams_.get('all_in_one', {}).get('enabled', False):
+        # Joint mode is independent of the experiment's backbone/template.
+        # Add missing acoustic/variance defaults, preserving experiment choices.
+        previously_loaded = loaded_config.copy()
+        loaded_config.clear()
+        defaults = load_config('configs/all_in_one.yaml')
+        loaded_config.update(previously_loaded)
+        override_config(defaults, hparams_)
+        hparams_ = defaults
+        hparams_['task_cls'] = 'training.all_in_one_task.AllInOneTask'
+        hparams_['binarizer_cls'] = 'preprocessing.all_in_one_binarizer.AllInOneBinarizer'
 
     @rank_zero_only
     def dump_hparams():

@@ -1,0 +1,3668 @@
+{
+  "method": "Exact state tensor bytes on meta, including FS2, auxiliary decoder, predictors, embeddings, buffers and quantization scales. Runtime budgets are estimates, not measured peaks.",
+  "hidden_size": 384,
+  "vocab_size": 65,
+  "acoustic_mel_bins": 128,
+  "rows": [
+    {
+      "scope": "acoustic",
+      "backbone": "wavenet",
+      "preset_index": 0,
+      "args": {
+        "num_layers": 12,
+        "num_channels": 128,
+        "dilation_cycle_length": 4
+      },
+      "parameters": 31516544,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 3141120
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 126066176,
+          "state_gib": 0.11740827560424805,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 12564480
+          },
+          "inference_budget_gib": [
+            1.117408275604248,
+            3.117408275604248
+          ]
+        },
+        "fp16": {
+          "state_bytes": 63033088,
+          "state_gib": 0.05870413780212402,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 6282240
+          },
+          "inference_budget_gib": [
+            1.058704137802124,
+            3.058704137802124
+          ]
+        },
+        "int8": {
+          "state_bytes": 31719032,
+          "state_gib": 0.02954065054655075,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 3188436
+          },
+          "inference_budget_gib": [
+            1.5295406505465508,
+            4.029540650546551
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "wavenet",
+      "preset_index": 1,
+      "args": {
+        "num_layers": 20,
+        "num_channels": 384,
+        "dilation_cycle_length": 4
+      },
+      "parameters": 62297728,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 33922304
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 249190912,
+          "state_gib": 0.23207712173461914,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 135689216
+          },
+          "inference_budget_gib": [
+            1.2320771217346191,
+            3.232077121734619
+          ]
+        },
+        "fp16": {
+          "state_bytes": 124595456,
+          "state_gib": 0.11603856086730957,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 67844608
+          },
+          "inference_budget_gib": [
+            1.1160385608673096,
+            3.1160385608673096
+          ]
+        },
+        "int8": {
+          "state_bytes": 62679544,
+          "state_gib": 0.05837487429380417,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 34148948
+          },
+          "inference_budget_gib": [
+            1.5583748742938042,
+            4.058374874293804
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "wavenet",
+      "preset_index": 2,
+      "args": {
+        "num_layers": 24,
+        "num_channels": 512,
+        "dilation_cycle_length": 4
+      },
+      "parameters": 97015808,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 68640384
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 388063232,
+          "state_gib": 0.36141204833984375,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 274561536
+          },
+          "inference_budget_gib": [
+            1.3614120483398438,
+            3.3614120483398438
+          ]
+        },
+        "fp16": {
+          "state_bytes": 194031616,
+          "state_gib": 0.18070602416992188,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 137280768
+          },
+          "inference_budget_gib": [
+            1.1807060241699219,
+            3.180706024169922
+          ]
+        },
+        "int8": {
+          "state_bytes": 97530296,
+          "state_gib": 0.0908321663737297,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 68999700
+          },
+          "inference_budget_gib": [
+            1.5908321663737297,
+            4.09083216637373
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "wavenet",
+      "preset_index": 3,
+      "args": {
+        "num_layers": 32,
+        "num_channels": 896,
+        "dilation_cycle_length": 4
+      },
+      "parameters": 289268352,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 260892928
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 1157073408,
+          "state_gib": 1.077608585357666,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 1043571712
+          },
+          "inference_budget_gib": [
+            2.077608585357666,
+            4.077608585357666
+          ]
+        },
+        "fp16": {
+          "state_bytes": 578536704,
+          "state_gib": 0.538804292678833,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 521785856
+          },
+          "inference_budget_gib": [
+            1.538804292678833,
+            3.538804292678833
+          ]
+        },
+        "int8": {
+          "state_bytes": 290252472,
+          "state_gib": 0.2703186795115471,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 261721876
+          },
+          "inference_budget_gib": [
+            1.770318679511547,
+            4.270318679511547
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "wavenet",
+      "preset_index": 4,
+      "args": {
+        "num_layers": 40,
+        "num_channels": 1472,
+        "dilation_cycle_length": 4
+      },
+      "parameters": 873937984,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 845562560
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 3495751936,
+          "state_gib": 3.2556726932525635,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 3382250240
+          },
+          "inference_budget_gib": [
+            4.2556726932525635,
+            6.2556726932525635
+          ]
+        },
+        "fp16": {
+          "state_bytes": 1747875968,
+          "state_gib": 1.6278363466262817,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 1691125120
+          },
+          "inference_budget_gib": [
+            2.6278363466262817,
+            4.627836346626282
+          ]
+        },
+        "int8": {
+          "state_bytes": 875784184,
+          "state_gib": 0.815637581050396,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 847253588
+          },
+          "inference_budget_gib": [
+            2.315637581050396,
+            4.815637581050396
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "wavenet",
+      "preset_index": 5,
+      "args": {
+        "num_layers": 40,
+        "num_channels": 2304,
+        "dilation_cycle_length": 4
+      },
+      "parameters": 2059211008,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 2030835584
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 8236844032,
+          "state_gib": 7.671158790588379,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 8123342336
+          },
+          "inference_budget_gib": [
+            8.671158790588379,
+            10.671158790588379
+          ]
+        },
+        "fp16": {
+          "state_bytes": 4118422016,
+          "state_gib": 3.8355793952941895,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 4061671168
+          },
+          "inference_budget_gib": [
+            4.8355793952941895,
+            6.8355793952941895
+          ]
+        },
+        "int8": {
+          "state_bytes": 2062012344,
+          "state_gib": 1.9203986451029778,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 2033481748
+          },
+          "inference_budget_gib": [
+            3.4203986451029778,
+            5.920398645102978
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "lynxnet",
+      "preset_index": 0,
+      "args": {
+        "num_layers": 6,
+        "num_channels": 128,
+        "expansion_factor": 2,
+        "kernel_size": 31
+      },
+      "parameters": 29581056,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 1205632
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 118324224,
+          "state_gib": 0.1101980209350586,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 4822528
+          },
+          "inference_budget_gib": [
+            1.1101980209350586,
+            3.1101980209350586
+          ]
+        },
+        "fp16": {
+          "state_bytes": 59162112,
+          "state_gib": 0.0550990104675293,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 2411264
+          },
+          "inference_budget_gib": [
+            1.0550990104675293,
+            3.0550990104675293
+          ]
+        },
+        "int8": {
+          "state_bytes": 29767676,
+          "state_gib": 0.02772330865263939,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 1237080
+          },
+          "inference_budget_gib": [
+            1.5277233086526394,
+            4.027723308652639
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "lynxnet",
+      "preset_index": 1,
+      "args": {
+        "num_layers": 12,
+        "num_channels": 384,
+        "expansion_factor": 2,
+        "kernel_size": 31
+      },
+      "parameters": 44157952,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 15782528
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 176631808,
+          "state_gib": 0.16450119018554688,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 63130112
+          },
+          "inference_budget_gib": [
+            1.1645011901855469,
+            3.164501190185547
+          ]
+        },
+        "fp16": {
+          "state_bytes": 88315904,
+          "state_gib": 0.08225059509277344,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 31565056
+          },
+          "inference_budget_gib": [
+            1.0822505950927734,
+            3.0822505950927734
+          ]
+        },
+        "int8": {
+          "state_bytes": 44489148,
+          "state_gib": 0.04143374785780907,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 15958552
+          },
+          "inference_budget_gib": [
+            1.541433747857809,
+            4.041433747857809
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "lynxnet",
+      "preset_index": 2,
+      "args": {
+        "num_layers": 16,
+        "num_channels": 512,
+        "expansion_factor": 2,
+        "kernel_size": 31
+      },
+      "parameters": 63728128,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 35352704
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 254912512,
+          "state_gib": 0.23740577697753906,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 141410816
+          },
+          "inference_budget_gib": [
+            1.237405776977539,
+            3.237405776977539
+          ]
+        },
+        "fp16": {
+          "state_bytes": 127456256,
+          "state_gib": 0.11870288848876953,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 70705408
+          },
+          "inference_budget_gib": [
+            1.1187028884887695,
+            3.1187028884887695
+          ]
+        },
+        "int8": {
+          "state_bytes": 64191548,
+          "state_gib": 0.05978303775191307,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 35660952
+          },
+          "inference_budget_gib": [
+            1.559783037751913,
+            4.059783037751913
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "lynxnet",
+      "preset_index": 3,
+      "args": {
+        "num_layers": 24,
+        "num_channels": 768,
+        "expansion_factor": 2,
+        "kernel_size": 31
+      },
+      "parameters": 140847616,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 112472192
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 563390464,
+          "state_gib": 0.5246982574462891,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 449888768
+          },
+          "inference_budget_gib": [
+            1.524698257446289,
+            3.524698257446289
+          ]
+        },
+        "fp16": {
+          "state_bytes": 281695232,
+          "state_gib": 0.26234912872314453,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 224944384
+          },
+          "inference_budget_gib": [
+            1.2623491287231445,
+            3.2623491287231445
+          ]
+        },
+        "int8": {
+          "state_bytes": 141686076,
+          "state_gib": 0.13195544108748436,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 113155480
+          },
+          "inference_budget_gib": [
+            1.6319554410874844,
+            4.131955441087484
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "lynxnet",
+      "preset_index": 4,
+      "args": {
+        "num_layers": 32,
+        "num_channels": 2048,
+        "expansion_factor": 2,
+        "kernel_size": 31
+      },
+      "parameters": 1032075776,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 1003700352
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 4128303104,
+          "state_gib": 3.8447818756103516,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 4014801408
+          },
+          "inference_budget_gib": [
+            4.844781875610352,
+            6.844781875610352
+          ]
+        },
+        "fp16": {
+          "state_bytes": 2064151552,
+          "state_gib": 1.9223909378051758,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 2007400704
+          },
+          "inference_budget_gib": [
+            2.922390937805176,
+            4.922390937805176
+          ]
+        },
+        "int8": {
+          "state_bytes": 1034640956,
+          "state_gib": 0.96358447894454,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 1006110360
+          },
+          "inference_budget_gib": [
+            2.46358447894454,
+            4.96358447894454
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "lynxnet",
+      "preset_index": 5,
+      "args": {
+        "num_layers": 40,
+        "num_channels": 2560,
+        "expansion_factor": 2,
+        "kernel_size": 31
+      },
+      "parameters": 1963489792,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 1935114368
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 7853959168,
+          "state_gib": 7.314569473266602,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 7740457472
+          },
+          "inference_budget_gib": [
+            8.314569473266602,
+            10.314569473266602
+          ]
+        },
+        "fp16": {
+          "state_bytes": 3926979584,
+          "state_gib": 3.657284736633301,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 3870228736
+          },
+          "inference_budget_gib": [
+            4.657284736633301,
+            6.657284736633301
+          ]
+        },
+        "int8": {
+          "state_bytes": 1967394620,
+          "state_gib": 1.832279022783041,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 1938864024
+          },
+          "inference_budget_gib": [
+            3.332279022783041,
+            5.832279022783041
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "lynxnet2",
+      "preset_index": 0,
+      "args": {
+        "num_layers": 6,
+        "num_channels": 256,
+        "expansion_factor": 1,
+        "kernel_size": 31,
+        "dropout_rate": 0.0,
+        "glu_type": "softsign_glu",
+        "use_conditioner_cache": false
+      },
+      "parameters": 31091968,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 2716544
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 124367872,
+          "state_gib": 0.11582660675048828,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 10866176
+          },
+          "inference_budget_gib": [
+            1.1158266067504883,
+            3.1158266067504883
+          ]
+        },
+        "fp16": {
+          "state_bytes": 62183936,
+          "state_gib": 0.05791330337524414,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 5433088
+          },
+          "inference_budget_gib": [
+            1.0579133033752441,
+            3.057913303375244
+          ]
+        },
+        "int8": {
+          "state_bytes": 31291856,
+          "state_gib": 0.02914281189441681,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 2761260
+          },
+          "inference_budget_gib": [
+            1.5291428118944168,
+            4.029142811894417
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "lynxnet2",
+      "preset_index": 1,
+      "args": {
+        "num_layers": 12,
+        "num_channels": 512,
+        "expansion_factor": 1,
+        "kernel_size": 31,
+        "dropout_rate": 0.0,
+        "glu_type": "softsign_glu",
+        "use_conditioner_cache": false
+      },
+      "parameters": 46773248,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 18397824
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 187092992,
+          "state_gib": 0.17424392700195312,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 73591296
+          },
+          "inference_budget_gib": [
+            1.1742439270019531,
+            3.174243927001953
+          ]
+        },
+        "fp16": {
+          "state_bytes": 93546496,
+          "state_gib": 0.08712196350097656,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 36795648
+          },
+          "inference_budget_gib": [
+            1.0871219635009766,
+            3.0871219635009766
+          ]
+        },
+        "int8": {
+          "state_bytes": 47091040,
+          "state_gib": 0.04385694861412048,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 18560444
+          },
+          "inference_budget_gib": [
+            1.5438569486141205,
+            4.0438569486141205
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "lynxnet2",
+      "preset_index": 2,
+      "args": {
+        "num_layers": 16,
+        "num_channels": 768,
+        "expansion_factor": 1,
+        "kernel_size": 31,
+        "dropout_rate": 0.0,
+        "glu_type": "softsign_glu",
+        "use_conditioner_cache": false
+      },
+      "parameters": 81257728,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 52882304
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 325030912,
+          "state_gib": 0.30270862579345703,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 211529216
+          },
+          "inference_budget_gib": [
+            1.302708625793457,
+            3.302708625793457
+          ]
+        },
+        "fp16": {
+          "state_bytes": 162515456,
+          "state_gib": 0.15135431289672852,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 105764608
+          },
+          "inference_budget_gib": [
+            1.1513543128967285,
+            3.1513543128967285
+          ]
+        },
+        "int8": {
+          "state_bytes": 81730240,
+          "state_gib": 0.07611721754074097,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 53199644
+          },
+          "inference_budget_gib": [
+            1.576117217540741,
+            4.076117217540741
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "lynxnet2",
+      "preset_index": 3,
+      "args": {
+        "num_layers": 24,
+        "num_channels": 1024,
+        "expansion_factor": 1,
+        "kernel_size": 31,
+        "dropout_rate": 0.0,
+        "glu_type": "softsign_glu",
+        "use_conditioner_cache": false
+      },
+      "parameters": 164216320,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 135840896
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 656865280,
+          "state_gib": 0.6117534637451172,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 543363584
+          },
+          "inference_budget_gib": [
+            1.6117534637451172,
+            3.611753463745117
+          ]
+        },
+        "fp16": {
+          "state_bytes": 328432640,
+          "state_gib": 0.3058767318725586,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 271681792
+          },
+          "inference_budget_gib": [
+            1.3058767318725586,
+            3.3058767318725586
+          ]
+        },
+        "int8": {
+          "state_bytes": 164991104,
+          "state_gib": 0.15365993976593018,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 136460508
+          },
+          "inference_budget_gib": [
+            1.6536599397659302,
+            4.15365993976593
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "lynxnet2",
+      "preset_index": 4,
+      "args": {
+        "num_layers": 32,
+        "num_channels": 2560,
+        "expansion_factor": 1,
+        "kernel_size": 31,
+        "dropout_rate": 0.0,
+        "glu_type": "softsign_glu",
+        "use_conditioner_cache": false
+      },
+      "parameters": 1134236672,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 1105861248
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 4536946688,
+          "state_gib": 4.225360870361328,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 4423444992
+          },
+          "inference_budget_gib": [
+            5.225360870361328,
+            7.225360870361328
+          ]
+        },
+        "fp16": {
+          "state_bytes": 2268473344,
+          "state_gib": 2.112680435180664,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 2211722496
+          },
+          "inference_budget_gib": [
+            3.112680435180664,
+            5.112680435180664
+          ]
+        },
+        "int8": {
+          "state_bytes": 1136430912,
+          "state_gib": 1.0583837628364563,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 1107900316
+          },
+          "inference_budget_gib": [
+            2.5583837628364563,
+            5.058383762836456
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "lynxnet2",
+      "preset_index": 5,
+      "args": {
+        "num_layers": 40,
+        "num_channels": 3072,
+        "expansion_factor": 1,
+        "kernel_size": 31,
+        "dropout_rate": 0.0,
+        "glu_type": "softsign_glu",
+        "use_conditioner_cache": false
+      },
+      "parameters": 1998095872,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 1969720448
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 7992383488,
+          "state_gib": 7.443487167358398,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 7878881792
+          },
+          "inference_budget_gib": [
+            8.443487167358398,
+            10.443487167358398
+          ]
+        },
+        "fp16": {
+          "state_bytes": 3996191744,
+          "state_gib": 3.721743583679199,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 3939440896
+          },
+          "inference_budget_gib": [
+            4.721743583679199,
+            6.721743583679199
+          ]
+        },
+        "int8": {
+          "state_bytes": 2001287680,
+          "state_gib": 1.863844394683838,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 1972757084
+          },
+          "inference_budget_gib": [
+            3.363844394683838,
+            5.863844394683838
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "dit",
+      "preset_index": 0,
+      "args": {
+        "num_layers": 4,
+        "num_channels": 128,
+        "num_heads": 2,
+        "mlp_ratio": 4,
+        "time_embed_dim": 256,
+        "patch_size": 1,
+        "use_gradient_checkpointing": true
+      },
+      "parameters": 29727488,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 1352064
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 118909952,
+          "state_gib": 0.11074352264404297,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 5408256
+          },
+          "inference_budget_gib": [
+            1.110743522644043,
+            3.110743522644043
+          ]
+        },
+        "fp16": {
+          "state_bytes": 59454976,
+          "state_gib": 0.055371761322021484,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 2704128
+          },
+          "inference_budget_gib": [
+            1.0553717613220215,
+            3.0553717613220215
+          ]
+        },
+        "int8": {
+          "state_bytes": 29917068,
+          "state_gib": 0.027862440794706345,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 1386472
+          },
+          "inference_budget_gib": [
+            1.5278624407947063,
+            4.027862440794706
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "dit",
+      "preset_index": 1,
+      "args": {
+        "num_layers": 8,
+        "num_channels": 384,
+        "num_heads": 6,
+        "mlp_ratio": 4,
+        "time_embed_dim": 256,
+        "patch_size": 1,
+        "use_gradient_checkpointing": true
+      },
+      "parameters": 50444032,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 22068608
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 201776128,
+          "state_gib": 0.18791866302490234,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 88274432
+          },
+          "inference_budget_gib": [
+            1.1879186630249023,
+            3.1879186630249023
+          ]
+        },
+        "fp16": {
+          "state_bytes": 100888064,
+          "state_gib": 0.09395933151245117,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 44137216
+          },
+          "inference_budget_gib": [
+            1.0939593315124512,
+            3.093959331512451
+          ]
+        },
+        "int8": {
+          "state_bytes": 50793436,
+          "state_gib": 0.04730507358908653,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 22262840
+          },
+          "inference_budget_gib": [
+            1.5473050735890865,
+            4.0473050735890865
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "dit",
+      "preset_index": 2,
+      "args": {
+        "num_layers": 12,
+        "num_channels": 640,
+        "num_heads": 10,
+        "mlp_ratio": 4,
+        "time_embed_dim": 256,
+        "patch_size": 1,
+        "use_gradient_checkpointing": true
+      },
+      "parameters": 118770432,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 90395008
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 475081728,
+          "state_gib": 0.44245433807373047,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 361580032
+          },
+          "inference_budget_gib": [
+            1.4424543380737305,
+            3.4424543380737305
+          ]
+        },
+        "fp16": {
+          "state_bytes": 237540864,
+          "state_gib": 0.22122716903686523,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 180790016
+          },
+          "inference_budget_gib": [
+            1.2212271690368652,
+            3.2212271690368652
+          ]
+        },
+        "int8": {
+          "state_bytes": 119402540,
+          "state_gib": 0.11120228096842766,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 90871944
+          },
+          "inference_budget_gib": [
+            1.6112022809684277,
+            4.111202280968428
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "dit",
+      "preset_index": 3,
+      "args": {
+        "num_layers": 16,
+        "num_channels": 1024,
+        "num_heads": 16,
+        "mlp_ratio": 4,
+        "time_embed_dim": 256,
+        "patch_size": 1,
+        "use_gradient_checkpointing": true
+      },
+      "parameters": 334680576,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 306305152
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 1338722304,
+          "state_gib": 1.2467823028564453,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 1225220608
+          },
+          "inference_budget_gib": [
+            2.2467823028564453,
+            4.246782302856445
+          ]
+        },
+        "fp16": {
+          "state_bytes": 669361152,
+          "state_gib": 0.6233911514282227,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 612610304
+          },
+          "inference_budget_gib": [
+            1.6233911514282227,
+            3.6233911514282227
+          ]
+        },
+        "int8": {
+          "state_bytes": 335844220,
+          "state_gib": 0.3127793036401272,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 307313624
+          },
+          "inference_budget_gib": [
+            1.8127793036401272,
+            4.312779303640127
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "dit",
+      "preset_index": 4,
+      "args": {
+        "num_layers": 24,
+        "num_channels": 1536,
+        "num_heads": 24,
+        "mlp_ratio": 4,
+        "time_embed_dim": 256,
+        "patch_size": 1,
+        "use_gradient_checkpointing": true
+      },
+      "parameters": 1056607744,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 1028232320
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 4226430976,
+          "state_gib": 3.9361705780029297,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 4112929280
+          },
+          "inference_budget_gib": [
+            4.93617057800293,
+            6.93617057800293
+          ]
+        },
+        "fp16": {
+          "state_bytes": 2113215488,
+          "state_gib": 1.9680852890014648,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 2056464640
+          },
+          "inference_budget_gib": [
+            2.968085289001465,
+            4.968085289001465
+          ]
+        },
+        "int8": {
+          "state_bytes": 1059012636,
+          "state_gib": 0.9862823747098446,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 1030482040
+          },
+          "inference_budget_gib": [
+            2.4862823747098446,
+            4.986282374709845
+          ]
+        }
+      }
+    },
+    {
+      "scope": "acoustic",
+      "backbone": "dit",
+      "preset_index": 5,
+      "args": {
+        "num_layers": 27,
+        "num_channels": 2048,
+        "num_heads": 32,
+        "mlp_ratio": 4,
+        "time_embed_dim": 256,
+        "patch_size": 1,
+        "use_gradient_checkpointing": true
+      },
+      "parameters": 2082066944,
+      "module_parameters": {
+        "fs2": 13907712,
+        "aux_decoder": 14467712,
+        "diffusion": 2053691520
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 8328267776,
+          "state_gib": 7.756303787231445,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 55630848,
+            "aux_decoder": 57870848,
+            "diffusion": 8214766080
+          },
+          "inference_budget_gib": [
+            8.756303787231445,
+            10.756303787231445
+          ]
+        },
+        "fp16": {
+          "state_bytes": 4164133888,
+          "state_gib": 3.8781518936157227,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 27815424,
+            "aux_decoder": 28935424,
+            "diffusion": 4107383040
+          },
+          "inference_budget_gib": [
+            4.878151893615723,
+            6.878151893615723
+          ]
+        },
+        "int8": {
+          "state_bytes": 2085590104,
+          "state_gib": 1.9423571452498436,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13986444,
+            "aux_decoder": 14544152,
+            "diffusion": 2057059508
+          },
+          "inference_budget_gib": [
+            3.4423571452498436,
+            5.942357145249844
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "wavenet",
+      "preset_index": 0,
+      "args": {
+        "num_layers": 6,
+        "num_channels": 128,
+        "dilation_cycle_length": 4
+      },
+      "parameters": 18062473,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 1644736,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 1646792
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 72249892,
+          "state_gib": 0.06728795543313026,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 6578944,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 6587168
+          },
+          "inference_budget_gib": [
+            1.0672879554331303,
+            3.0672879554331303
+          ]
+        },
+        "fp16": {
+          "state_bytes": 36124946,
+          "state_gib": 0.03364397771656513,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 3289472,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 3293584
+          },
+          "inference_budget_gib": [
+            1.0336439777165651,
+            3.033643977716565
+          ]
+        },
+        "int8": {
+          "state_bytes": 18212857,
+          "state_gib": 0.01696204487234354,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 1670196,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 1672284
+          },
+          "inference_budget_gib": [
+            1.5169620448723435,
+            4.0169620448723435
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "wavenet",
+      "preset_index": 1,
+      "args": {
+        "num_layers": 10,
+        "num_channels": 384,
+        "dilation_cycle_length": 4
+      },
+      "parameters": 50029193,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 17626048,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 17632200
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 200116772,
+          "state_gib": 0.1863732673227787,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 70504192,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 70528800
+          },
+          "inference_budget_gib": [
+            1.1863732673227787,
+            3.1863732673227787
+          ]
+        },
+        "fp16": {
+          "state_bytes": 100058386,
+          "state_gib": 0.09318663366138935,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 35252096,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 35264400
+          },
+          "inference_budget_gib": [
+            1.0931866336613894,
+            3.0931866336613894
+          ]
+        },
+        "int8": {
+          "state_bytes": 50366073,
+          "state_gib": 0.04690706077963114,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 17744756,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 17750940
+          },
+          "inference_budget_gib": [
+            1.5469070607796311,
+            4.046907060779631
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "wavenet",
+      "preset_index": 2,
+      "args": {
+        "num_layers": 12,
+        "num_channels": 512,
+        "dilation_cycle_length": 4
+      },
+      "parameters": 85782409,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 35501632,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 35509832
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 343129636,
+          "state_gib": 0.319564376026392,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 142006528,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 142039328
+          },
+          "inference_budget_gib": [
+            1.319564376026392,
+            3.319564376026392
+          ]
+        },
+        "fp16": {
+          "state_bytes": 171564818,
+          "state_gib": 0.159782188013196,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 71003264,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 71019664
+          },
+          "inference_budget_gib": [
+            1.159782188013196,
+            3.159782188013196
+          ]
+        },
+        "int8": {
+          "state_bytes": 86255545,
+          "state_gib": 0.08033173624426126,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 35688468,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 35696700
+          },
+          "inference_budget_gib": [
+            1.5803317362442613,
+            4.080331736244261
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "wavenet",
+      "preset_index": 3,
+      "args": {
+        "num_layers": 16,
+        "num_channels": 896,
+        "dilation_cycle_length": 4
+      },
+      "parameters": 282909833,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 134062272,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 134076616
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 1131639332,
+          "state_gib": 1.0539212562143803,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 536249088,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 536306464
+          },
+          "inference_budget_gib": [
+            2.0539212562143803,
+            4.05392125621438
+          ]
+        },
+        "fp16": {
+          "state_bytes": 565819666,
+          "state_gib": 0.5269606281071901,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 268124544,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 268153232
+          },
+          "inference_budget_gib": [
+            1.5269606281071901,
+            3.52696062810719
+          ]
+        },
+        "int8": {
+          "state_bytes": 283863353,
+          "state_gib": 0.2643683487549424,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 134489300,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 134503676
+          },
+          "inference_budget_gib": [
+            1.7643683487549424,
+            4.264368348754942
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "wavenet",
+      "preset_index": 4,
+      "args": {
+        "num_layers": 20,
+        "num_channels": 1472,
+        "dilation_cycle_length": 4
+      },
+      "parameters": 879868425,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 432536960,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 432560520
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 3519473700,
+          "state_gib": 3.2777653075754642,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 1730147840,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 1730242080
+          },
+          "inference_budget_gib": [
+            4.277765307575464,
+            6.277765307575464
+          ]
+        },
+        "fp16": {
+          "state_bytes": 1759736850,
+          "state_gib": 1.6388826537877321,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 865073920,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 865121040
+          },
+          "inference_budget_gib": [
+            2.638882653787732,
+            4.638882653787732
+          ]
+        },
+        "int8": {
+          "state_bytes": 881700153,
+          "state_gib": 0.8211472565308213,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 433403092,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 433426684
+          },
+          "inference_budget_gib": [
+            2.3211472565308213,
+            4.821147256530821
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "wavenet",
+      "preset_index": 5,
+      "args": {
+        "num_layers": 20,
+        "num_channels": 2304,
+        "dilation_cycle_length": 4
+      },
+      "parameters": 2093435273,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 1039313728,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 1039350600
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 8373741092,
+          "state_gib": 7.7986541129648685,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 4157254912,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 4157402400
+          },
+          "inference_budget_gib": [
+            8.798654112964869,
+            10.798654112964869
+          ]
+        },
+        "fp16": {
+          "state_bytes": 4186870546,
+          "state_gib": 3.8993270564824343,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 2078627456,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 2078701200
+          },
+          "inference_budget_gib": [
+            4.899327056482434,
+            6.899327056482434
+          ]
+        },
+        "int8": {
+          "state_bytes": 2096245433,
+          "state_gib": 1.9522806936874986,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 1040669076,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 1040705980
+          },
+          "inference_budget_gib": [
+            3.4522806936874986,
+            5.952280693687499
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "lynxnet",
+      "preset_index": 0,
+      "args": {
+        "num_layers": 3,
+        "num_channels": 128,
+        "expansion_factor": 2,
+        "kernel_size": 31
+      },
+      "parameters": 16110729,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 668864,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 670920
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 64442916,
+          "state_gib": 0.060017142444849014,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 2675456,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 2683680
+          },
+          "inference_budget_gib": [
+            1.060017142444849,
+            3.060017142444849
+          ]
+        },
+        "fp16": {
+          "state_bytes": 32221458,
+          "state_gib": 0.030008571222424507,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 1337728,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 1341840
+          },
+          "inference_budget_gib": [
+            1.0300085712224245,
+            3.0300085712224245
+          ]
+        },
+        "int8": {
+          "state_bytes": 16244737,
+          "state_gib": 0.015129090286791325,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 686136,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 688224
+          },
+          "inference_budget_gib": [
+            1.5151290902867913,
+            4.015129090286791
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "lynxnet",
+      "preset_index": 1,
+      "args": {
+        "num_layers": 6,
+        "num_channels": 384,
+        "expansion_factor": 2,
+        "kernel_size": 31
+      },
+      "parameters": 31742345,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 8482624,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 8488776
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 126969380,
+          "state_gib": 0.11824944987893105,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 33930496,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 33955104
+          },
+          "inference_budget_gib": [
+            1.118249449878931,
+            3.118249449878931
+          ]
+        },
+        "fp16": {
+          "state_bytes": 63484690,
+          "state_gib": 0.05912472493946552,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 16965248,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 16977552
+          },
+          "inference_budget_gib": [
+            1.0591247249394655,
+            3.0591247249394655
+          ]
+        },
+        "int8": {
+          "state_bytes": 32027073,
+          "state_gib": 0.029827536083757877,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 8575256,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 8581440
+          },
+          "inference_budget_gib": [
+            1.5298275360837579,
+            4.029827536083758
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "lynxnet",
+      "preset_index": 2,
+      "args": {
+        "num_layers": 8,
+        "num_channels": 512,
+        "expansion_factor": 2,
+        "kernel_size": 31
+      },
+      "parameters": 52233097,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 18726976,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 18735176
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 208932388,
+          "state_gib": 0.1945834495127201,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 74907904,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 74940704
+          },
+          "inference_budget_gib": [
+            1.19458344951272,
+            3.19458344951272
+          ]
+        },
+        "fp16": {
+          "state_bytes": 104466194,
+          "state_gib": 0.09729172475636005,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 37453952,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 37470352
+          },
+          "inference_budget_gib": [
+            1.09729172475636,
+            3.09729172475636
+          ]
+        },
+        "int8": {
+          "state_bytes": 52653121,
+          "state_gib": 0.04903704021126032,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 18887256,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 18895488
+          },
+          "inference_budget_gib": [
+            1.5490370402112603,
+            4.04903704021126
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "lynxnet",
+      "preset_index": 3,
+      "args": {
+        "num_layers": 12,
+        "num_channels": 768,
+        "expansion_factor": 2,
+        "kernel_size": 31
+      },
+      "parameters": 131980169,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 58598464,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 58610760
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 527920676,
+          "state_gib": 0.49166444316506386,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 234393856,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 234443040
+          },
+          "inference_budget_gib": [
+            1.4916644431650639,
+            3.491664443165064
+          ]
+        },
+        "fp16": {
+          "state_bytes": 263960338,
+          "state_gib": 0.24583222158253193,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 117196928,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 117221520
+          },
+          "inference_budget_gib": [
+            1.245832221582532,
+            3.245832221582532
+          ]
+        },
+        "int8": {
+          "state_bytes": 132781377,
+          "state_gib": 0.12366229388862848,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 58949336,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 58961664
+          },
+          "inference_budget_gib": [
+            1.6236622938886285,
+            4.1236622938886285
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "lynxnet",
+      "preset_index": 4,
+      "args": {
+        "num_layers": 16,
+        "num_channels": 2048,
+        "expansion_factor": 2,
+        "kernel_size": 31
+      },
+      "parameters": 1052074889,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 518635584,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 518668360
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 4208299556,
+          "state_gib": 3.919284377247095,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 2074542336,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 2074673440
+          },
+          "inference_budget_gib": [
+            4.919284377247095,
+            6.919284377247095
+          ]
+        },
+        "fp16": {
+          "state_bytes": 2104149778,
+          "state_gib": 1.9596421886235476,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 1037271168,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 1037336720
+          },
+          "inference_budget_gib": [
+            2.9596421886235476,
+            4.9596421886235476
+          ]
+        },
+        "int8": {
+          "state_bytes": 1054633537,
+          "state_gib": 0.9822040209546685,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 519865176,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 519897984
+          },
+          "inference_budget_gib": [
+            2.4822040209546685,
+            4.9822040209546685
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "lynxnet",
+      "preset_index": 5,
+      "args": {
+        "num_layers": 20,
+        "num_channels": 2560,
+        "expansion_factor": 2,
+        "kernel_size": 31
+      },
+      "parameters": 2002375561,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 993781824,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 993822792
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 8009502244,
+          "state_gib": 7.459430251270533,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 3975127296,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 3975291168
+          },
+          "inference_budget_gib": [
+            8.459430251270533,
+            10.459430251270533
+          ]
+        },
+        "fp16": {
+          "state_bytes": 4004751122,
+          "state_gib": 3.7297151256352663,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 1987563648,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 1987645584
+          },
+          "inference_budget_gib": [
+            4.729715125635266,
+            6.729715125635266
+          ]
+        },
+        "int8": {
+          "state_bytes": 2006286145,
+          "state_gib": 1.8684995779767632,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 995687384,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 995728384
+          },
+          "inference_budget_gib": [
+            3.3684995779767632,
+            5.868499577976763
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "lynxnet2",
+      "preset_index": 0,
+      "args": {
+        "num_layers": 3,
+        "num_channels": 256,
+        "expansion_factor": 1,
+        "kernel_size": 31,
+        "dropout_rate": 0.0,
+        "glu_type": "softsign_glu",
+        "use_conditioner_cache": false
+      },
+      "parameters": 18116489,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 1670720,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 1674824
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 72465956,
+          "state_gib": 0.06748918071389198,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 6682880,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 6699296
+          },
+          "inference_budget_gib": [
+            1.067489180713892,
+            3.067489180713892
+          ]
+        },
+        "fp16": {
+          "state_bytes": 36232978,
+          "state_gib": 0.03374459035694599,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 3341440,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 3349648
+          },
+          "inference_budget_gib": [
+            1.033744590356946,
+            3.033744590356946
+          ]
+        },
+        "int8": {
+          "state_bytes": 18267865,
+          "state_gib": 0.01701327506452799,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 1696676,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 1700812
+          },
+          "inference_budget_gib": [
+            1.517013275064528,
+            4.017013275064528
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "lynxnet2",
+      "preset_index": 1,
+      "args": {
+        "num_layers": 6,
+        "num_channels": 512,
+        "expansion_factor": 1,
+        "kernel_size": 31,
+        "dropout_rate": 0.0,
+        "glu_type": "softsign_glu",
+        "use_conditioner_cache": false
+      },
+      "parameters": 35475337,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 10348096,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 10356296
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 141901348,
+          "state_gib": 0.13215592876076698,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 41392384,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 41425184
+          },
+          "inference_budget_gib": [
+            1.132155928760767,
+            3.132155928760767
+          ]
+        },
+        "fp16": {
+          "state_bytes": 70950674,
+          "state_gib": 0.06607796438038349,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 20696192,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 20712592
+          },
+          "inference_budget_gib": [
+            1.0660779643803835,
+            3.0660779643803835
+          ]
+        },
+        "int8": {
+          "state_bytes": 35751785,
+          "state_gib": 0.033296444453299046,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 10436588,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 10444820
+          },
+          "inference_budget_gib": [
+            1.533296444453299,
+            4.033296444453299
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "lynxnet2",
+      "preset_index": 2,
+      "args": {
+        "num_layers": 8,
+        "num_channels": 768,
+        "expansion_factor": 1,
+        "kernel_size": 31,
+        "dropout_rate": 0.0,
+        "glu_type": "softsign_glu",
+        "use_conditioner_cache": false
+      },
+      "parameters": 72685961,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 28951360,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 28963656
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 290743844,
+          "state_gib": 0.27077630534768105,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 115805440,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 115854624
+          },
+          "inference_budget_gib": [
+            1.270776305347681,
+            3.270776305347681
+          ]
+        },
+        "fp16": {
+          "state_bytes": 145371922,
+          "state_gib": 0.13538815267384052,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 57902720,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 57927312
+          },
+          "inference_budget_gib": [
+            1.1353881526738405,
+            3.1353881526738405
+          ]
+        },
+        "int8": {
+          "state_bytes": 73124297,
+          "state_gib": 0.06810230854898691,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 29120796,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 29133124
+          },
+          "inference_budget_gib": [
+            1.568102308548987,
+            4.068102308548987
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "lynxnet2",
+      "preset_index": 3,
+      "args": {
+        "num_layers": 12,
+        "num_channels": 1024,
+        "expansion_factor": 1,
+        "kernel_size": 31,
+        "dropout_rate": 0.0,
+        "glu_type": "softsign_glu",
+        "use_conditioner_cache": false
+      },
+      "parameters": 159419273,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 72315968,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 72332360
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 637677092,
+          "state_gib": 0.5938830710947514,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 289263872,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 289329440
+          },
+          "inference_budget_gib": [
+            1.5938830710947514,
+            3.5938830710947514
+          ]
+        },
+        "fp16": {
+          "state_bytes": 318838546,
+          "state_gib": 0.2969415355473757,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 144631936,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 144664720
+          },
+          "inference_budget_gib": [
+            1.2969415355473757,
+            3.2969415355473757
+          ]
+        },
+        "int8": {
+          "state_bytes": 160167049,
+          "state_gib": 0.1491671884432435,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 72640124,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 72656548
+          },
+          "inference_budget_gib": [
+            1.6491671884432435,
+            4.1491671884432435
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "lynxnet2",
+      "preset_index": 4,
+      "args": {
+        "num_layers": 16,
+        "num_channels": 2560,
+        "expansion_factor": 1,
+        "kernel_size": 31,
+        "dropout_rate": 0.0,
+        "glu_type": "softsign_glu",
+        "use_conditioner_cache": false
+      },
+      "parameters": 1174108041,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 579648064,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 579689032
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 4696432164,
+          "state_gib": 4.373893294483423,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 2318592256,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 2318756128
+          },
+          "inference_budget_gib": [
+            5.373893294483423,
+            7.373893294483423
+          ]
+        },
+        "fp16": {
+          "state_bytes": 2348216082,
+          "state_gib": 2.1869466472417116,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 1159296128,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 1159378064
+          },
+          "inference_budget_gib": [
+            3.1869466472417116,
+            5.186946647241712
+          ]
+        },
+        "int8": {
+          "state_bytes": 1176318281,
+          "state_gib": 1.095531770028174,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 580703452,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 580744452
+          },
+          "inference_budget_gib": [
+            2.595531770028174,
+            5.095531770028174
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "lynxnet2",
+      "preset_index": 5,
+      "args": {
+        "num_layers": 20,
+        "num_channels": 3072,
+        "expansion_factor": 1,
+        "kernel_size": 31,
+        "dropout_rate": 0.0,
+        "glu_type": "softsign_glu",
+        "use_conditioner_cache": false
+      },
+      "parameters": 2061245321,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 1023212608,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 1023261768
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 8244981284,
+          "state_gib": 7.678737197071314,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 4092850432,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 4093047072
+          },
+          "inference_budget_gib": [
+            8.678737197071314,
+            10.678737197071314
+          ]
+        },
+        "fp16": {
+          "state_bytes": 4122490642,
+          "state_gib": 3.839368598535657,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 2046425216,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 2046523536
+          },
+          "inference_budget_gib": [
+            4.839368598535657,
+            6.839368598535657
+          ]
+        },
+        "int8": {
+          "state_bytes": 2064467465,
+          "state_gib": 1.9226851547136903,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 1024773948,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 1024823140
+          },
+          "inference_budget_gib": [
+            3.4226851547136903,
+            5.92268515471369
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "dit",
+      "preset_index": 0,
+      "args": {
+        "num_layers": 2,
+        "num_channels": 128,
+        "num_heads": 2,
+        "mlp_ratio": 4,
+        "time_embed_dim": 256,
+        "patch_size": 1,
+        "use_gradient_checkpointing": true
+      },
+      "parameters": 16256905,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 741952,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 744008
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 65027620,
+          "state_gib": 0.06056169047951698,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 2967808,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 2976032
+          },
+          "inference_budget_gib": [
+            1.060561690479517,
+            3.060561690479517
+          ]
+        },
+        "fp16": {
+          "state_bytes": 32513810,
+          "state_gib": 0.03028084523975849,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 1483904,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 1488016
+          },
+          "inference_budget_gib": [
+            1.0302808452397585,
+            3.0302808452397585
+          ]
+        },
+        "int8": {
+          "state_bytes": 16393873,
+          "state_gib": 0.015267984010279179,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 760704,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 762792
+          },
+          "inference_budget_gib": [
+            1.5152679840102792,
+            4.015267984010279
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "dit",
+      "preset_index": 1,
+      "args": {
+        "num_layers": 4,
+        "num_channels": 384,
+        "num_heads": 6,
+        "mlp_ratio": 4,
+        "time_embed_dim": 256,
+        "patch_size": 1,
+        "use_gradient_checkpointing": true
+      },
+      "parameters": 37536137,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 11379520,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 11385672
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 150144548,
+          "state_gib": 0.1398330070078373,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 45518080,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 45542688
+          },
+          "inference_budget_gib": [
+            1.1398330070078373,
+            3.1398330070078373
+          ]
+        },
+        "fp16": {
+          "state_bytes": 75072274,
+          "state_gib": 0.06991650350391865,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 22759040,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 22771344
+          },
+          "inference_budget_gib": [
+            1.0699165035039186,
+            3.0699165035039186
+          ]
+        },
+        "int8": {
+          "state_bytes": 37839073,
+          "state_gib": 0.03524038288742304,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 11481256,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 11487440
+          },
+          "inference_budget_gib": [
+            1.535240382887423,
+            4.035240382887423
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "dit",
+      "preset_index": 2,
+      "args": {
+        "num_layers": 6,
+        "num_channels": 640,
+        "num_heads": 10,
+        "mlp_ratio": 4,
+        "time_embed_dim": 256,
+        "patch_size": 1,
+        "use_gradient_checkpointing": true
+      },
+      "parameters": 106818441,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 46018624,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 46028872
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 427273764,
+          "state_gib": 0.39792970195412636,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 184074496,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 184115488
+          },
+          "inference_budget_gib": [
+            1.3979297019541264,
+            3.3979297019541264
+          ]
+        },
+        "fp16": {
+          "state_bytes": 213636882,
+          "state_gib": 0.19896485097706318,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 92037248,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 92057744
+          },
+          "inference_budget_gib": [
+            1.1989648509770632,
+            3.198964850977063
+          ]
+        },
+        "int8": {
+          "state_bytes": 107410225,
+          "state_gib": 0.10003356728702784,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 46264784,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 46275064
+          },
+          "inference_budget_gib": [
+            1.6000335672870278,
+            4.100033567287028
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "dit",
+      "preset_index": 3,
+      "args": {
+        "num_layers": 8,
+        "num_channels": 1024,
+        "num_heads": 16,
+        "mlp_ratio": 4,
+        "time_embed_dim": 256,
+        "patch_size": 1,
+        "use_gradient_checkpointing": true
+      },
+      "parameters": 324899721,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 155056192,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 155072584
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 1299598884,
+          "state_gib": 1.2103457786142826,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 620224768,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 620290336
+          },
+          "inference_budget_gib": [
+            2.2103457786142826,
+            4.210345778614283
+          ]
+        },
+        "fp16": {
+          "state_bytes": 649799442,
+          "state_gib": 0.6051728893071413,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 310112384,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 310145168
+          },
+          "inference_budget_gib": [
+            1.6051728893071413,
+            3.6051728893071413
+          ]
+        },
+        "int8": {
+          "state_bytes": 326032257,
+          "state_gib": 0.30364120099693537,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 155572728,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 155589152
+          },
+          "inference_budget_gib": [
+            1.8036412009969354,
+            4.303641200996935
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "dit",
+      "preset_index": 4,
+      "args": {
+        "num_layers": 12,
+        "num_channels": 1536,
+        "num_heads": 24,
+        "mlp_ratio": 4,
+        "time_embed_dim": 256,
+        "patch_size": 1,
+        "use_gradient_checkpointing": true
+      },
+      "parameters": 1051097993,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 518151232,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 518175816
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 4204391972,
+          "state_gib": 3.915645156055689,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 2072604928,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 2072703264
+          },
+          "inference_budget_gib": [
+            4.915645156055689,
+            6.915645156055689
+          ]
+        },
+        "fp16": {
+          "state_bytes": 2102195986,
+          "state_gib": 1.9578225780278444,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 1036302464,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 1036351632
+          },
+          "inference_budget_gib": [
+            2.9578225780278444,
+            4.957822578027844
+          ]
+        },
+        "int8": {
+          "state_bytes": 1053484065,
+          "state_gib": 0.9811334917321801,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 519294536,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 519319152
+          },
+          "inference_budget_gib": [
+            2.48113349173218,
+            4.98113349173218
+          ]
+        }
+      }
+    },
+    {
+      "scope": "variance",
+      "backbone": "dit",
+      "preset_index": 5,
+      "args": {
+        "num_layers": 13,
+        "num_channels": 2048,
+        "num_heads": 32,
+        "mlp_ratio": 4,
+        "time_embed_dim": 256,
+        "patch_size": 1,
+        "use_gradient_checkpointing": true
+      },
+      "parameters": 2006872969,
+      "module_parameters": {
+        "fs2": 13399937,
+        "rr": 0,
+        "lr": 0,
+        "melody_encoder": 1365632,
+        "delta_pitch_embed": 768,
+        "pitch_retake_embed": 768,
+        "pitch_predictor": 996034624,
+        "pitch_embed": 768,
+        "variance_embeds": 3072,
+        "variance_predictor": 996067400
+      },
+      "precisions": {
+        "fp32": {
+          "state_bytes": 8027491876,
+          "state_gib": 7.476184401661158,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 53599748,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 5462528,
+            "delta_pitch_embed": 3072,
+            "pitch_retake_embed": 3072,
+            "pitch_predictor": 3984138496,
+            "pitch_embed": 3072,
+            "variance_embeds": 12288,
+            "variance_predictor": 3984269600
+          },
+          "inference_budget_gib": [
+            8.476184401661158,
+            10.476184401661158
+          ]
+        },
+        "fp16": {
+          "state_bytes": 4013745938,
+          "state_gib": 3.738092200830579,
+          "int8_parameter_coverage": 0.0,
+          "module_bytes": {
+            "fs2": 26799874,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 2731264,
+            "delta_pitch_embed": 1536,
+            "pitch_retake_embed": 1536,
+            "pitch_predictor": 1992069248,
+            "pitch_embed": 1536,
+            "variance_embeds": 6144,
+            "variance_predictor": 1992134800
+          },
+          "inference_budget_gib": [
+            4.738092200830579,
+            6.738092200830579
+          ]
+        },
+        "int8": {
+          "state_bytes": 2010266697,
+          "state_gib": 1.872206755913794,
+          "int8_parameter_coverage": 1.0,
+          "module_bytes": {
+            "fs2": 13469013,
+            "rr": 0,
+            "lr": 0,
+            "melody_encoder": 1386740,
+            "delta_pitch_embed": 2308,
+            "pitch_retake_embed": 776,
+            "pitch_predictor": 997681756,
+            "pitch_embed": 2308,
+            "variance_embeds": 9232,
+            "variance_predictor": 997714564
+          },
+          "inference_budget_gib": [
+            3.372206755913794,
+            5.872206755913794
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -51,6 +51,28 @@ class BaseExporter:
         """
         raise NotImplementedError()
 
+    def export_tensor_graph(self, model, args, path, **kwargs):
+        """Use one set of deployment inputs for ONNX and TorchScript writers."""
+        from deployment.modules.quantization import prepare_portable_modules, register_integer_onnx_symbolics
+        register_integer_onnx_symbolics()
+        prepare_portable_modules(model, 'int8', compile_integer=True)
+        writer = getattr(self, 'graph_writer', torch.onnx.export)
+        if not hasattr(self, 'graph_writer') and getattr(self.model, '_checkpoint_precision', None) in ('int8', 'fp16'):
+            from deployment.exporters.torchscript_exporter import compile_stage
+            model, args, _ = compile_stage(model, args,
+                                         freeze=getattr(self.model, '_checkpoint_precision', None) != 'fp16')
+        result = writer(model, args, path, **kwargs)
+        if writer is torch.onnx.export:
+            self.scope_onnx_graph(path)
+        return result
+
+    def scope_onnx_graph(self, path):
+        import onnx
+        from utils.onnx_helper import prefix_internal_values
+        graph = onnx.load(str(path))
+        prefix_internal_values(graph, Path(path).stem + '.')
+        onnx.save(graph, str(path))
+
     def export_model(self, path: Path):
         """
         Exports the model to ONNX format.
@@ -58,13 +80,27 @@ class BaseExporter:
         """
         raise NotImplementedError()
 
+    def simplify_graph(self, model, **kwargs):
+        import onnx
+        import onnxsim
+        if getattr(self.model, '_checkpoint_precision', None) is not None:
+            # Deployment stages contain dynamic loops and captured parent
+            # values. Preserve validated graphs: simplifier folding can either
+            # be very expensive or break these references in optimized models.
+            onnx.checker.check_model(model)
+            return model, True
+        return onnxsim.simplify(model, **kwargs)
+
     # noinspection PyMethodMayBeStatic
     def export_dictionaries(self, path: Path):
         dicts = hparams.get('dictionaries')
         if dicts is not None:
             for lang in dicts.keys():
                 fn = f'dictionary-{lang}.txt'
-                shutil.copy(pathlib.Path(hparams['work_dir']) / fn, path)
+                source = pathlib.Path(hparams['work_dir']) / fn
+                if not source.is_file():
+                    source = pathlib.Path(dicts[lang])
+                shutil.copy(source, path / fn)
                 print(f'| export dictionary => {path / fn}')
         else:
             fn = 'dictionary.txt'

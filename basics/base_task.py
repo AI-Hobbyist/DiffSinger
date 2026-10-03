@@ -11,6 +11,7 @@ import utils
 
 matplotlib.use('Agg')
 
+import torch.nn as nn
 import torch.utils.data
 from torchmetrics import Metric, MeanMetric
 import lightning.pytorch as pl
@@ -73,8 +74,8 @@ class BaseTask(pl.LightningModule):
         self.phoneme_dictionary = load_phoneme_dictionary()
         self.build_model()
 
-        self.valid_losses: Dict[str, Metric] = {}
-        self.valid_metrics: Dict[str, Metric] = {}
+        self.valid_losses = nn.ModuleDict()
+        self.valid_metrics = nn.ModuleDict()
 
     def _finish_init(self):
         self.register_validation_loss('total_loss')
@@ -203,6 +204,8 @@ class BaseTask(pl.LightningModule):
     def on_train_epoch_start(self):
         if self.training_sampler is not None:
             self.training_sampler.set_epoch(self.current_epoch)
+        if self.logger:
+            self.logger.log_metrics({'epoch/current_epoch': self.current_epoch}, step=self.global_step)
 
     def _training_step(self, sample):
         """
@@ -345,9 +348,9 @@ class BaseTask(pl.LightningModule):
             collate_fn=self.train_dataset.collater,
             batch_sampler=self.training_sampler,
             num_workers=hparams['ds_workers'],
-            prefetch_factor=hparams['dataloader_prefetch_factor'],
+            prefetch_factor=(hparams['dataloader_prefetch_factor'] if hparams['ds_workers'] > 0 else None),
             pin_memory=True,
-            persistent_workers=True
+            persistent_workers=(hparams['ds_workers'] > 0)
         )
 
     def val_dataloader(self):
@@ -367,8 +370,8 @@ class BaseTask(pl.LightningModule):
             collate_fn=self.valid_dataset.collater,
             batch_sampler=sampler,
             num_workers=hparams['ds_workers'],
-            prefetch_factor=hparams['dataloader_prefetch_factor'],
-            persistent_workers=True
+            prefetch_factor=(hparams['dataloader_prefetch_factor'] if hparams['ds_workers'] > 0 else None),
+            persistent_workers=(hparams['ds_workers'] > 0)
         )
 
     def test_dataloader(self):
@@ -396,6 +399,8 @@ class BaseTask(pl.LightningModule):
         #     print("load success-------------------------------------------------------------------")
 
         work_dir = pathlib.Path(hparams['work_dir'])
+        from utils.training_schedule import training_schedule_options
+        schedule_options = training_schedule_options(hparams)
         trainer = pl.Trainer(
             accelerator=hparams['pl_trainer_accelerator'],
             devices=hparams['pl_trainer_devices'],
@@ -416,6 +421,7 @@ class BaseTask(pl.LightningModule):
                     monitor='step',
                     mode='max',
                     save_last=False,
+                    save_on_train_epoch_end=False,
                     # every_n_train_steps=hparams['val_check_interval'],
                     save_top_k=hparams['num_ckpt_keep'],
                     permanent_ckpt_start=hparams['permanent_ckpt_start'],
@@ -431,11 +437,8 @@ class BaseTask(pl.LightningModule):
                 version='latest'
             ),
             gradient_clip_val=hparams['clip_grad_norm'],
-            val_check_interval=hparams['val_check_interval'] * hparams['accumulate_grad_batches'],
-            # so this is global_steps
-            check_val_every_n_epoch=None,
+            **schedule_options,
             log_every_n_steps=1,
-            max_steps=hparams['max_updates'],
             use_distributed_sampler=False,
             num_sanity_val_steps=hparams['num_sanity_val_steps'],
             accumulate_grad_batches=hparams['accumulate_grad_batches']
@@ -445,6 +448,8 @@ class BaseTask(pl.LightningModule):
             def train_payload_copy():
                 # Copy files to work_dir
                 binary_dir = pathlib.Path(hparams['binary_data_dir'])
+                if hparams.get('all_in_one', {}).get('enabled', False):
+                    binary_dir /= 'acoustic'
                 spk_map_dst = work_dir / 'spk_map.json'
                 spk_map_src = binary_dir / 'spk_map.json'
                 shutil.copy(spk_map_src, spk_map_dst)
@@ -467,7 +472,8 @@ class BaseTask(pl.LightningModule):
     def on_save_checkpoint(self, checkpoint):
         if isinstance(self.model, CategorizedModule):
             checkpoint['category'] = self.model.category
-        checkpoint['trainer_stage'] = self.trainer.state.stage.value
+        stage = self.trainer.state.stage
+        checkpoint['trainer_stage'] = stage.value if stage is not None else ''
 
     def on_load_checkpoint(self, checkpoint):
         from lightning.pytorch.trainer.states import RunningStage

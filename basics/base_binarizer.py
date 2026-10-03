@@ -42,17 +42,18 @@ class BaseBinarizer:
             the phoneme set.
     """
 
-    def __init__(self, datasets=None, data_attrs=None):
+    def __init__(self, datasets=None, data_attrs=None, binary_data_dir=None):
         if datasets is None:
             datasets = hparams['datasets']
         self.datasets = datasets
         self.raw_data_dirs = [pathlib.Path(ds['raw_data_dir']) for ds in self.datasets]
-        self.binary_data_dir = pathlib.Path(hparams['binary_data_dir'])
+        self.binary_data_dir = pathlib.Path(binary_data_dir or hparams['binary_data_dir'])
         self.data_attrs = [] if data_attrs is None else data_attrs
 
         self.binarization_args = hparams['binarization_args']
         self.augmentation_args = hparams.get('augmentation_args', {})
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        from utils.preprocessing_resources import preprocessing_device
+        self.device = preprocessing_device(self.binarization_args)
 
         self.spk_map = {}
         self.spk_ids = None
@@ -161,44 +162,48 @@ class BaseBinarizer:
             yield item_name, meta_data
 
     def process(self):
-        # load each dataset
-        test_prefixes = []
-        for ds_id, dataset in enumerate(self.datasets):
-            items = self.load_meta_data(
-                pathlib.Path(dataset['raw_data_dir']),
-                ds_id=ds_id, spk=dataset['speaker'], lang=dataset['language']
-            )
-            self.items.update(items)
-            test_prefixes.extend(
-                f'{ds_id}:{prefix}'
-                for prefix in dataset.get('test_prefixes', [])
-            )
-        self.item_names = sorted(list(self.items.keys()))
-        self._train_item_names, self._valid_item_names = self.split_train_valid_set(test_prefixes)
-
-        self.binary_data_dir.mkdir(parents=True, exist_ok=True)
-
-        # Copy spk_map, lang_map and dictionary to binary data dir
-        spk_map_fn = self.binary_data_dir / 'spk_map.json'
-        with open(spk_map_fn, 'w', encoding='utf-8') as f:
-            json.dump(self.spk_map, f, ensure_ascii=False)
-        lang_map_fn = self.binary_data_dir / 'lang_map.json'
-        with open(lang_map_fn, 'w', encoding='utf-8') as f:
-            json.dump(self.lang_map, f, ensure_ascii=False)
-        for lang, dict_path in hparams['dictionaries'].items():
-            shutil.copy(dict_path, self.binary_data_dir / f'dictionary-{lang}.txt')
-        self.check_coverage()
-
-        # Process valid set and train set
         try:
-            self.process_dataset('valid')
-            self.process_dataset(
-                'train',
-                num_workers=int(self.binarization_args['num_workers']),
-                apply_augmentation=any(args['enabled'] for args in self.augmentation_args.values())
-            )
-        except KeyboardInterrupt:
-            exit(-1)
+            # load each dataset
+            test_prefixes = []
+            for ds_id, dataset in enumerate(self.datasets):
+                items = self.load_meta_data(
+                    pathlib.Path(dataset['raw_data_dir']),
+                    ds_id=ds_id, spk=dataset['speaker'], lang=dataset['language']
+                )
+                self.items.update(items)
+                test_prefixes.extend(
+                    f'{ds_id}:{prefix}'
+                    for prefix in dataset.get('test_prefixes', [])
+                )
+            self.item_names = sorted(list(self.items.keys()))
+            self._train_item_names, self._valid_item_names = self.split_train_valid_set(test_prefixes)
+
+            self.binary_data_dir.mkdir(parents=True, exist_ok=True)
+
+            # Copy spk_map, lang_map and dictionary to binary data dir
+            spk_map_fn = self.binary_data_dir / 'spk_map.json'
+            with open(spk_map_fn, 'w', encoding='utf-8') as f:
+                json.dump(self.spk_map, f, ensure_ascii=False)
+            lang_map_fn = self.binary_data_dir / 'lang_map.json'
+            with open(lang_map_fn, 'w', encoding='utf-8') as f:
+                json.dump(self.lang_map, f, ensure_ascii=False)
+            for lang, dict_path in hparams['dictionaries'].items():
+                shutil.copy(dict_path, self.binary_data_dir / f'dictionary-{lang}.txt')
+            self.check_coverage()
+
+            # Process valid set and train set
+            try:
+                self.process_dataset('valid')
+                self.process_dataset(
+                    'train',
+                    num_workers=int(self.binarization_args['num_workers']),
+                    apply_augmentation=any(args['enabled'] for args in self.augmentation_args.values())
+                )
+            except KeyboardInterrupt:
+                exit(-1)
+        finally:
+            from utils.preprocessing_resources import release_binarizer_resources
+            release_binarizer_resources(self.device)
 
     def check_coverage(self):
         # Group by phonemes in the dictionary.
@@ -256,9 +261,11 @@ class BaseBinarizer:
                 self.phoneme_dictionary.decode_one(idx, scalar=False)
                 for idx in ph_idx_required.difference(ph_idx_occurred)
             }, key=lambda v: v[0] if isinstance(v, tuple) else v)
-            raise BinarizationError(
-                f'The following phonemes are not covered in transcriptions: {missing_phones}'
-            )
+            message = f'The following phonemes are not covered in transcriptions: {missing_phones}'
+            if self.binarization_args.get('allow_missing_phonemes', False):
+                warnings.warn(message, category=UserWarning)
+            else:
+                raise BinarizationError(message)
 
     def process_dataset(self, prefix, num_workers=0, apply_augmentation=False):
         args = []
@@ -272,6 +279,9 @@ class BaseBinarizer:
             args.append([item_name, meta_data, self.binarization_args])
 
         aug_map = self.arrange_data_augmentation(self.meta_data_iterator(prefix)) if apply_augmentation else {}
+
+        from utils.preprocessing_resources import preprocessing_worker_devices
+        num_workers, device_ids = preprocessing_worker_devices(self.binarization_args, int(num_workers), self.device)
 
         def postprocess(_item):
             nonlocal total_sec, total_raw_sec, extra_info, max_no
@@ -312,7 +322,7 @@ class BaseBinarizer:
             if num_workers > 0:
                 # code for parallel processing
                 for item in tqdm(
-                        chunked_multiprocess_run(self.process_item, args, num_workers=num_workers),
+                        chunked_multiprocess_run(self.process_item, args, num_workers=num_workers, device_ids=device_ids),
                         total=len(list(self.meta_data_iterator(prefix)))
                 ):
                     postprocess(item)
