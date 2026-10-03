@@ -49,7 +49,9 @@ Assume that you have a configuration file called `my_config.yaml` and the name o
 python scripts/train.py --config my_config.yaml --exp_name my_experiment --reset
 ```
 
-Checkpoints will be saved at the `checkpoints/my_experiment/` directory. When interrupting the program and running the above command again, the training resumes automatically from the latest checkpoint.
+Checkpoints will be saved at the `ckpt/my_experiment/` directory. When interrupting the program and running the above command again, the training resumes automatically from the latest checkpoint.
+
+When upgrading from a version using `checkpoints/`, rename that directory to `ckpt/` and update paths in your own configuration files, including saved experiment `config.yaml` files (`vocoder_ckpt`, `pe_ckpt`, `hnsep_ckpt`, and `finetune_ckpt_path`).
 
 For more suggestions related to training performance, see [performance tuning](BestPractices.md#performance-tuning).
 
@@ -58,7 +60,7 @@ For more suggestions related to training performance, see [performance tuning](B
 Run the following command to start TensorBoard:
 
 ```bash
-tensorboard --logdir checkpoints/
+tensorboard --logdir ckpt/
 ```
 
 > [!NOTE]

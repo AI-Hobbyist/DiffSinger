@@ -4,7 +4,7 @@ acoustic、variance 和 all-in-one 的原始或优化 checkpoint 共用部署模
 
 ## ONNX
 
-先按 [量化文档](CheckpointOptimization.md) 生成推理 checkpoint。输出放在 `checkpoints/my_model_int8` 时，使用现有入口：
+先按 [量化文档](CheckpointOptimization.md) 生成推理 checkpoint。输出放在 `ckpt/my_model_int8` 时，使用现有入口：
 
 ```bash
 python scripts/export.py acoustic --exp my_model_int8 --out artifacts/my_model_int8/acoustic
@@ -32,7 +32,7 @@ session = ort.InferenceSession('model.onnx', options, providers=['CPUExecutionPr
 
 ```bash
 python scripts/export_torchscript.py \
-  --checkpoint checkpoints/my_model_int8/model_ckpt_steps_100000.ckpt \
+  --checkpoint ckpt/my_model_int8/model_ckpt_steps_100000.ckpt \
   --output-dir artifacts/my_model_libtorch
 ```
 

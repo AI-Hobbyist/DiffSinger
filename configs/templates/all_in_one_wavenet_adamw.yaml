@@ -78,4 +78,4 @@ lr_scheduler_args:
 use_dual_timestep: false
 use_fused_kernels: false
 ds_workers: 0
-vocoder_ckpt: checkpoints/pc_nsf_hifigan_44.1k_hop512_128bin_2025.02/model.ckpt
+vocoder_ckpt: ckpt/pc_nsf_hifigan_44.1k_hop512_128bin_2025.02/model.ckpt

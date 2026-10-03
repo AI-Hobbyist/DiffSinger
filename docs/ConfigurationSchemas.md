@@ -5,10 +5,10 @@
 DiffSinger uses a cascading configuration system based on YAML files. Inheritance is completely explicit: a configuration file inherits from other files by listing them in its `base_config` attribute. Sources are applied in the following order, with later sources overriding earlier ones:
 
 1. **The `base_config` chain** (from `--config`): base files are loaded depth-first, and configurations are merged recursively: when the overriding value is a mapping and the key already exists in the inherited configuration, it is merged key by key into the existing mapping instead of replacing the whole mapping; non-mapping values (scalars, lists, etc.) simply replace whatever was there before. Keys that exist in only one configuration are kept. All configurations in the inheritance chain are squashed as the final configuration of this source.
-2. **The saved experiment configuration**: when `--exp_name` is given, the final configuration is saved to `checkpoints/<exp_name>/config.yaml` (with `base_config` emptied), which is detached from the chain and independent of other configuration files. When the same `--exp_name` is used again (e.g., when resuming training), every key present in the saved file replaces the chain's value wholesale, including nested mappings, while keys that exist only in the chain are kept. Pass `--reset` to discard the saved configuration and rebuild it from `--config` (the rebuilt configuration is then saved again).
+2. **The saved experiment configuration**: when `--exp_name` is given, the final configuration is saved to `ckpt/<exp_name>/config.yaml` (with `base_config` emptied), which is detached from the chain and independent of other configuration files. When the same `--exp_name` is used again (e.g., when resuming training), every key present in the saved file replaces the chain's value wholesale, including nested mappings, while keys that exist only in the chain are kept. Pass `--reset` to discard the saved configuration and rebuild it from `--config` (the rebuilt configuration is then saved again).
 3. **Command-line overrides** (from `--hparams key=value,key=value`): applied last, taking precedence over both sources above. The argument string is split on `,` and then on `=`, so values must not contain either character. The override syntax addresses top-level keys only (it does not interpret dotted paths). For an existing key, conversion is only reliable for scalar values whose current type is `bool`, `int`, `float` or `str`; list/mapping values and `None` are not reliably convertible. Boolean overrides currently require Python's `True`/`False` spellings, and the parser uses `eval()` for overrides, so do not use it with untrusted input.
 
-The final configuration is saved to the experiment directory at startup only when `checkpoints/<exp_name>/config.yaml` does not exist yet or `--reset` is given; resuming an existing experiment does *not* re-save it. The saving step is skipped when `--infer` is given, which also marks the run as inference (`hparams['infer']` set to `true`). Only the main process performs the saving.
+The final configuration is saved to the experiment directory at startup only when `ckpt/<exp_name>/config.yaml` does not exist yet or `--reset` is given; resuming an existing experiment does *not* re-save it. The saving step is skipped when `--infer` is given, which also marks the run as inference (`hparams['infer']` set to `true`). Only the main process performs the saving.
 
 ## Configurable parameters
 
@@ -978,7 +978,7 @@ Checkpoint or model path of NN-based harmonic-noise separator.
 <tr><td align="center"><b>scope</b></td><td>preprocessing</td>
 <tr><td align="center"><b>customizability</b></td><td>normal</td>
 <tr><td align="center"><b>type</b></td><td>str</td>
-<tr><td align="center"><b>default</b></td><td>checkpoints/vr/model.pt</td>
+<tr><td align="center"><b>default</b></td><td>ckpt/vr/model.pt</td>
 </tbody></table>
 
 ### hop_size
@@ -1411,7 +1411,7 @@ Checkpoint or model path of NN-based pitch extractor.
 <tr><td align="center"><b>scope</b></td><td>preprocessing</td>
 <tr><td align="center"><b>customizability</b></td><td>normal</td>
 <tr><td align="center"><b>type</b></td><td>str</td>
-<tr><td align="center"><b>default</b></td><td>checkpoints/rmvpe/model.pt</td>
+<tr><td align="center"><b>default</b></td><td>ckpt/rmvpe/model.pt</td>
 </tbody></table>
 
 ### permanent_ckpt_interval
@@ -2298,7 +2298,7 @@ Checkpoint or model path of NN-based vocoder.
 <tr><td align="center"><b>scope</b></td><td>training, inference</td>
 <tr><td align="center"><b>customizability</b></td><td>normal</td>
 <tr><td align="center"><b>type</b></td><td>str</td>
-<tr><td align="center"><b>default</b></td><td>checkpoints/pc_nsf_hifigan_44.1k_hop512_128bin_2025.02/model.ckpt</td>
+<tr><td align="center"><b>default</b></td><td>ckpt/pc_nsf_hifigan_44.1k_hop512_128bin_2025.02/model.ckpt</td>
 </tbody></table>
 
 ### voicing_db_max

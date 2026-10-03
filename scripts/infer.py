@@ -14,8 +14,8 @@ sys.path.insert(0, str(root_dir))
 
 
 def find_exp(exp):
-    if not (root_dir / 'checkpoints' / exp).exists():
-        for subdir in (root_dir / 'checkpoints').iterdir():
+    if not (root_dir / 'ckpt' / exp).exists():
+        for subdir in (root_dir / 'ckpt').iterdir():
             if not subdir.is_dir():
                 continue
             if subdir.name.startswith(exp):
@@ -24,7 +24,7 @@ def find_exp(exp):
                 break
         else:
             raise click.BadParameter(
-                f'There are no matching exp starting with \'{exp}\' in \'checkpoints\' folder. '
+                f'There are no matching exp starting with \'{exp}\' in \'ckpt\' folder. '
                 'Please specify \'--exp\' as the folder name or prefix.'
             )
     else:
@@ -163,7 +163,7 @@ def acoustic(
     # Check for vocoder path
     assert mel or (root_dir / hparams['vocoder_ckpt']).exists(), \
         f'Vocoder ckpt \'{hparams["vocoder_ckpt"]}\' not found. ' \
-        f'Please put it to the checkpoints directory to run inference.'
+        f'Please put it to the ckpt directory to run inference.'
 
     # For compatibility:
     # migrate timesteps, K_step, K_step_infer, diff_speedup to time_scale_factor, T_start, T_start_infer, sampling_steps

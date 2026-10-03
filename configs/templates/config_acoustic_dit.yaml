@@ -19,7 +19,7 @@ binarization_args:
   num_workers: 0
   allow_missing_phonemes: false
 vocoder: NsfHifiGAN
-vocoder_ckpt: checkpoints/pc_nsf_hifigan_44.1k_hop512_128bin_2025.02/model.ckpt
+vocoder_ckpt: ckpt/pc_nsf_hifigan_44.1k_hop512_128bin_2025.02/model.ckpt
 use_lang_id: false
 num_lang: 1
 use_spk_id: false

@@ -32,9 +32,9 @@ binary_data_dir: data/xxx/binary
 binarization_args:
   num_workers: 0
 pe: parselmouth
-pe_ckpt: 'checkpoints/rmvpe/model.pt'
+pe_ckpt: 'ckpt/rmvpe/model.pt'
 hnsep: vr
-hnsep_ckpt: 'checkpoints/vr/model.pt'
+hnsep_ckpt: 'ckpt/vr/model.pt'
 
 use_lang_id: false
 num_lang: 1

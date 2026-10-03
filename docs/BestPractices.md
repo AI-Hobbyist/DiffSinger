@@ -134,7 +134,7 @@ The current recommended way of using a model for production purposes is to use [
 
 A vocoder is a model that can reconstruct the audio waveform given the low-dimensional mel-spectrogram. The vocoder is the essential dependency if you want to train an acoustic model and hear the voice on TensorBoard.
 
-The [DiffSinger Community Vocoders Project](https://openvpi.github.io/vocoders) provides a universal pre-trained NSF-HiFiGAN vocoder that can be used for starters of this repository. To use it, download the model (~50 MB size) from its releases and unzip it into the `checkpoints/` folder.
+The [DiffSinger Community Vocoders Project](https://openvpi.github.io/vocoders) provides a universal pre-trained NSF-HiFiGAN vocoder that can be used for starters of this repository. To use it, download the model (~50 MB size) from its releases and unzip it into the `ckpt/` folder.
 
 The pre-trained vocoder can be fine-tuned on your target dataset. It is highly recommended to do so because fine-tuned vocoder can generate much better results on specific (seen) datasets while not requiring much computing resources. See the [vocoder training and fine-tuning repository](https://github.com/openvpi/SingingVocoders) for detailed instructions. After you get the fine-tuned vocoder checkpoint, you can configure it by `vocoder_ckpt` key in your configuration file. The fine-tuned NSF-HiFiGAN vocoder checkpoints can be exported to ONNX format like other DiffSinger user models for further production purposes.
 
@@ -314,7 +314,7 @@ A pitch extractor estimates pitch (F0 sequence) from given recordings. F0 (funda
 
 ```yaml
 pe: parselmouth  # pitch extractor type
-pe_ckpt: checkpoints/xxx/model.pt  # pitch extractor model path (if it requires any)
+pe_ckpt: ckpt/xxx/model.pt  # pitch extractor model path (if it requires any)
 ```
 
 #### Parselmouth
@@ -331,11 +331,11 @@ pe: parselmouth
 
 [RMVPE](https://github.com/Dream-High/RMVPE) (Robust Model for Vocal Pitch Estimation) is the state-of-the-art NN-based pitch estimation model for singing voice. It runs slower than parselmouth, consumes more memory, however uses CUDA to accelerate computation (if available) and produces better results on noisy recordings and edge cases.
 
-To enable RMVPE, download its pre-trained checkpoint from [here](https://github.com/yxlllc/RMVPE/releases), extract it into the `checkpoints/` folder and edit the configuration file:
+To enable RMVPE, download its pre-trained checkpoint from [here](https://github.com/yxlllc/RMVPE/releases), extract it into the `ckpt/` folder and edit the configuration file:
 
 ```yaml
 pe: rmvpe
-pe_ckpt: checkpoints/rmvpe/model.pt
+pe_ckpt: ckpt/rmvpe/model.pt
 ```
 
 #### Harvest
@@ -373,11 +373,11 @@ hnsep: world
 
 Vocal Remover (VR) is originally a popular NN-based algorithm for music source separation that removes the vocal part from the music. This repository uses a specially trained model for harmonic-noise separation. VR extracts much cleaner harmonic parts, utilizes CUDA to accelerate computation (if available) and runs much faster than WORLD. However, it consumes more memory and should not be used with too many parallel workers.
 
-To enable VR, download its pre-trained checkpoint from [here](https://github.com/yxlllc/vocal-remover/releases), extract it into the `checkpoints/` folder and edit the configuration file:
+To enable VR, download its pre-trained checkpoint from [here](https://github.com/yxlllc/vocal-remover/releases), extract it into the `ckpt/` folder and edit the configuration file:
 
 ```yaml
 hnsep: vr
-hnsep_ckpt: checkpoints/vr/model.pt
+hnsep_ckpt: ckpt/vr/model.pt
 ```
 
 ## Shallow diffusion
@@ -604,7 +604,7 @@ By default, the training starts from a model with randomly initialized parameter
 ```yaml
 # take acoustic models as an example
 finetune_enabled: true  # the main switch to enable fine-tuning
-finetune_ckpt_path: checkpoints/pretrained/model_ckpt_steps_320000.ckpt  # path to your pre-trained checkpoint
+finetune_ckpt_path: ckpt/pretrained/model_ckpt_steps_320000.ckpt  # path to your pre-trained checkpoint
 finetune_ignored_params:  # prefix rules to exclude specific parameters when loading the checkpoints
   - model.fs2.encoder.embed_tokens  # in case when the phoneme set is changed
   - model.fs2.txt_embed  # same as above

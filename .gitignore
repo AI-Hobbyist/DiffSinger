@@ -9,8 +9,8 @@ infer_out/
 *.onnx
 /data/*
 !/data/.gitkeep
-/checkpoints/*
-!/checkpoints/.gitkeep
+/ckpt/*
+!/ckpt/.gitkeep
 /venv/
 /artifacts/
 

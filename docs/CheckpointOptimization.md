@@ -8,9 +8,9 @@
 
 ```bash
 python scripts/optimize_checkpoint.py \
-  --checkpoint checkpoints/my_model/model_ckpt_steps_100000.ckpt \
+  --checkpoint ckpt/my_model/model_ckpt_steps_100000.ckpt \
   --precision int8 \
-  --output-dir checkpoints/my_model_int8
+  --output-dir ckpt/my_model_int8
 ```
 
 `--config` 默认读取原 checkpoint 同目录的 `config.yaml`。配置中的字典路径按仓库根目录解析。输出目录必须不存在，原权重不会被覆盖。FP16/FP32 对应 `--precision fp16` / `--precision fp32`；FP32 可用于只剪枝而不降低权重精度。
@@ -18,8 +18,8 @@ python scripts/optimize_checkpoint.py \
 联合 checkpoint 默认保留全部分支，也可以分别生成独立权重：
 
 ```bash
-python scripts/optimize_checkpoint.py --checkpoint checkpoints/joint/model_ckpt_steps_100000.ckpt --component acoustic --precision int8 --output-dir checkpoints/acoustic_int8
-python scripts/optimize_checkpoint.py --checkpoint checkpoints/joint/model_ckpt_steps_100000.ckpt --component variance --precision fp16 --output-dir checkpoints/variance_fp16
+python scripts/optimize_checkpoint.py --checkpoint ckpt/joint/model_ckpt_steps_100000.ckpt --component acoustic --precision int8 --output-dir ckpt/acoustic_int8
+python scripts/optimize_checkpoint.py --checkpoint ckpt/joint/model_ckpt_steps_100000.ckpt --component variance --precision fp16 --output-dir ckpt/variance_fp16
 ```
 
 输出包含 `model_ckpt_steps_*.ckpt`、完整 `config.yaml`、复制后的字典、源配置同目录的 speaker/language map（如果存在），以及 `optimization.json`。使用现有命令推理：
