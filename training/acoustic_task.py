@@ -96,8 +96,7 @@ class AcousticTask(BaseTask):
             self.required_variances.append('tension')
         super()._finish_init()
 
-        # ── Fuse LYNXNet2 backbone kernels (in-place) ──
-        # Only SoftSignGLU backbones are patched.
+        # Fuse supported LYNXNet2 SoftSignGLU and DiT GELU kernels in-place.
         self._fused_kernels_patched = 0
         if hparams.get('use_fused_kernels', False):
             try:
@@ -108,7 +107,7 @@ class AcousticTask(BaseTask):
                     getattr(self.model, 'acoustic', self.model).diffusion,
                     glu_type=hparams['backbone_args'].get('glu_type', 'swiglu'),
                 )
-                rank_zero_info('Fused kernels: patched %d LYNXNet2 blocks', self._fused_kernels_patched)
+                rank_zero_info('Fused kernels: patched %d blocks', self._fused_kernels_patched)
             except ImportError as e:
                 from lightning.pytorch.utilities.rank_zero import rank_zero_info
                 rank_zero_info('Fused kernels unavailable (ImportError: %s); running eager.', e)

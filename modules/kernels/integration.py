@@ -1,6 +1,9 @@
 """
 Drop-in replacement for LYNXNet2Block with fused Linear+SoftSignGLU kernels.
 
+DiT backbones use a separate Linear+tanh GELU MLP kernel through the same
+patching and warmup entry points. Both retain their original eval forward.
+
 The fused kernel replaces:
   nn.Linear(dim, inner_dim*2) + SoftSignGLU  →  one fused kernel call
 (training mode only; eval mode uses the original nn.Sequential path).
@@ -146,7 +149,7 @@ def patch_lynxnet2_model(model, glu_type='softsign_glu'):
 # ---------------------------------------------------------------------------
 
 def _patch_backbone_fn(backbone_fn, glu_type):
-    """Patch a single backbone function/module if it's a LYNXNet2.
+    """Patch a single LYNXNet2 or DiT backbone.
 
     Args:
         backbone_fn: The backbone module (e.g., diffusion.denoise_fn)
@@ -156,13 +159,20 @@ def _patch_backbone_fn(backbone_fn, glu_type):
         Number of blocks patched (0 if not a LYNXNet2).
     """
     from modules.backbones.lynxnet2 import LYNXNet2
+    from modules.backbones.dit import DiT
+    if isinstance(backbone_fn, DiT):
+        if not is_triton_available():
+            warnings.warn('DiT fused kernels require Triton; running eager.', stacklevel=2)
+            return 0
+        from modules.kernels.dit import patch_dit_model
+        return patch_dit_model(backbone_fn)
     if not isinstance(backbone_fn, LYNXNet2):
         return 0
     return patch_lynxnet2_model(backbone_fn, glu_type=glu_type)
 
 
 def _try_patch(module, attr, glu_type):
-    """Try to patch backbone at module.attr if it's a LYNXNet2. Safe to call
+    """Try to patch a supported backbone at module.attr. Safe to call
     even if attr doesn't exist — returns 0 silently."""
     backbone = getattr(module, attr, None)
     if backbone is None:
@@ -206,7 +216,7 @@ def warmup_fused_backbone(backbone, max_frames=None, autocast_dtype=None):
     a real run will hit: from a small bucket up to next_power_of_2(max_frames).
 
     Args:
-        backbone: LYNXNet2 model (already patched).
+        backbone: LYNXNet2 or DiT model (already patched).
         max_frames: max total frames per batch (hparams['max_batch_frames']).
             If None, warms a single small bucket only.
         autocast_dtype: torch.float16 for '16-mixed', torch.bfloat16 for
@@ -227,7 +237,9 @@ def warmup_fused_backbone(backbone, max_frames=None, autocast_dtype=None):
     import triton
 
     # cond hidden size from the conditioner projection (Linear or Conv1d)
-    proj = backbone.conditioner_projection
+    proj = getattr(backbone, 'cond_proj', None)
+    if proj is None:
+        proj = backbone.conditioner_projection
     hidden = getattr(proj, 'in_features', None) or proj.in_channels
 
     B = 4

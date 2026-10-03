@@ -126,17 +126,17 @@ class VarianceTask(BaseTask):
         self._patch_variance_fused_kernels()
 
     def _patch_variance_fused_kernels(self):
-        # ── Fuse LYNXNet2 backbone kernels (in-place) ──
+        # Fuse supported LYNXNet2 SoftSignGLU and DiT GELU kernels in-place.
         self._variance_fused_kernels_patched = 0
         self._variance_fused_kernel_backbones = []
         if hparams.get('use_fused_kernels', False):
             try:
                 from modules.backbones.lynxnet2 import LYNXNet2
+                from modules.backbones.dit import DiT
                 from modules.kernels.integration import patch_diffusion_module
                 from lightning.pytorch.utilities.rank_zero import rank_zero_info
-                # Each predictor has its own backbone config; patch only the ones
-                # actually configured with softsign_glu (others are skipped with
-                # a warning instead of silently changing their math).
+                # Each predictor has its own config. DiT fuses GELU; LYNXNet2
+                # requires softsign_glu, without changing the configured math.
                 # NOTE: LYNXNet2 defaults to swiglu when glu_type is unset.
                 for predictor_attr, args_key in (
                     ('pitch_predictor', 'pitch_prediction_args'),
@@ -151,10 +151,10 @@ class VarianceTask(BaseTask):
                     if n > 0:
                         for attr in ('denoise_fn', 'velocity_fn'):
                             backbone = getattr(predictor, attr, None)
-                            if isinstance(backbone, LYNXNet2):
+                            if isinstance(backbone, (LYNXNet2, DiT)):
                                 self._variance_fused_kernel_backbones.append(backbone)
                     rank_zero_info(
-                        'Fused kernels: patched %d LYNXNet2 blocks in %s (glu_type=%s)',
+                        'Fused kernels: patched %d blocks in %s (glu_type=%s)',
                         n, predictor_attr, glu
                     )
             except ImportError as e:

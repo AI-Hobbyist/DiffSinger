@@ -2030,7 +2030,9 @@ Whether to accept and embed energy values into the model.
 
 ### use_fused_kernels
 
-Whether to use Triton-fused Linear + SoftSignGLU operations during training in LYNXNet2 backbones, reducing kernel launches and intermediate memory traffic.
+Whether to use Triton-fused operations during training: Linear + SoftSignGLU for LYNXNet2, or Linear + tanh GELU for DiT MLPs. The DiT forward fuses matrix multiplication, bias, and activation; backward fuses the GELU derivative and uses PyTorch matrix multiplications for input and weight gradients.
+
+Applies to acoustic, variance, and all-in-one, with DDPM or Rectified Flow. Default `false`; enable with `use_fused_kernels: true` or `--hparams use_fused_kernels=True`. Evaluation and export use the original forward path. Module names and checkpoint keys are preserved. CPU and FP32 activations use eager computation. DiT retains eager computation if Triton is unavailable, with a warning at patch time. This option does not enable Triton Muon optimizer kernels.
 
 <table><tbody>
 <tr><td align="center"><b>visibility</b></td><td>acoustic, variance</td>
@@ -2038,7 +2040,7 @@ Whether to use Triton-fused Linear + SoftSignGLU operations during training in L
 <tr><td align="center"><b>customizability</b></td><td>recommended</td>
 <tr><td align="center"><b>type</b></td><td>bool</td>
 <tr><td align="center"><b>default</b></td><td>false</td>
-<tr><td align="center"><b>constraints</b></td><td>Fusion requires a LYNXNet2 backbone with <code>glu_type: softsign_glu</code>, Triton, and a supported CUDA device and activation dtype (float16 or bfloat16).</td>
+<tr><td align="center"><b>constraints</b></td><td>Actual fusion requires Triton, CUDA, and float16 or bfloat16 activations. LYNXNet2 also requires <code>glu_type: softsign_glu</code>; DiT uses its existing GELU MLP without changing its activation.</td>
 </tbody></table>
 
 ### use_glide_embed

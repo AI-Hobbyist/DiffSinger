@@ -50,6 +50,7 @@ clip_grad_norm: 1
 # train and eval
 ###########
 num_ckpt_keep: 5
+use_fused_kernels: false  # Optional Triton fusion for LYNXNet2 SoftSignGLU and DiT GELU training
 accumulate_grad_batches: 1
 log_interval: 100
 num_sanity_val_steps: 1  # steps of validation at the beginning
